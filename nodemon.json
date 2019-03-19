@@ -1,0 +1,8 @@
+{
+
+  "env": {
+    "MONGO_USER": "khoa_admin",
+    "MONGO_PWD": "7dmiRWsb0Xoi6IfB",
+    "MONGO_DB": "taskira"
+  }
+}
