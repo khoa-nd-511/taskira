@@ -1,11 +1,20 @@
 const express = require('express');
 const graphqlHTTP = require('express-graphql')
 const mongoose = require('mongoose');
+const config = require('config');
 
 const schema = require('./graphql/schema');
 const rootResolver = require('./graphql/resolver');
+const isAuth = require('./middleware/auth')
+
+if (!config.get('jwtPrivateKey')) {
+  console.log('FATAL ERROR!!! jwtPrivateKey is not defined.')
+  process.exit(1)
+}
 
 const app = express();
+
+app.use(isAuth);
 
 app.use('/graphql', graphqlHTTP({
   schema,

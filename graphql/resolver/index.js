@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const config = require('config');
 const Fawn = require('fawn');
 
 const Ticket = require('../../models/ticket');
@@ -7,41 +9,37 @@ const User = require('../../models/user');
 
 Fawn.init(mongoose);
 
-const mapTicketData = (ticketData, hasAssignee = false) => {
+const mapTicketData = (ticketData) => {
   let mappedTicketData = {
     ...ticketData._doc,
     creator: queryUser.bind(this, ticketData.creator)
   };
 
-  if (hasAssignee) {
-    mappedTicketData['assignee'] = queryUser.bind(this, ticketData.assignee)
-  }
+  if (ticketData.assignee) {
+    return {
+      ...mappedTicketData,
+      assignee: queryUser.bind(this, ticketData.assignee)
+    }
+  };
 
   return mappedTicketData;
 };
 
-const mapUserData = (userData, hasAssignedTicket = false) => {
-  if (hasAssignedTicket) {
-    return {
-      ...userData._doc,
-      createdTickets: queryTickets.bind(this, userData.createdTickets),
-      assignedTickets: queryTickets.bind(this, assignedTickets)
-    }
-  }
-
+const mapUserData = (userData) => {
   return {
     ...userData._doc,
-    createdTickets: queryTickets.bind(this, userData.createdTickets)
-  }
+    createdTickets: queryTickets.bind(this, userData.createdTickets),
+    assignedTickets: queryTickets.bind(this, userData.assignedTickets)
+  };
 }
 
 const queryUser = async userId => {
   try {
+
     const user = await User.findById(userId);
 
-    if (!user) throw new Error("User not found!")
-
     return mapUserData(user);
+
   } catch (err) {
     throw err;
   }
@@ -49,22 +47,27 @@ const queryUser = async userId => {
 
 const queryTickets = async ticketIds => {
   try {
+
     const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
     return tickets.map(t => mapTicketData(t));
+
   } catch (error) {
     throw error
   }
 };
 
 const resolver = {
-  createTicket: async args => {
+  createTicket: async (args, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     try {
+
       const ticket = new Ticket({
         title: args.ticketInput.title,
         description: args.ticketInput.description,
         hiPri: args.ticketInput.hiPri,
-        creator: "5c9113a6afd82d35a45a2cf2",
+        creator: req.userId,
         label: args.ticketInput.label,
         createdDate: new Date(args.ticketInput.createdDate)
       });
@@ -77,15 +80,19 @@ const resolver = {
         .run();
 
       return mapTicketData(ticket);
+
     } catch (err) {
       throw err;
     }
   },
 
-  createUser: async args => {
+  createUser: async (args, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     try {
+
       const oldUser = await User.findOne({ email: args.userInput.email });
-      if (!oldUser) throw new Error("User exists");
+      if (oldUser) throw new Error("User exists");
 
       const hashedPwd = await bcrypt.hash(args.userInput.password, 12);
       const userObj = new User({
@@ -95,21 +102,48 @@ const resolver = {
 
       const newUser = await userObj.save();
 
-      return newUser;
+      return {
+        ...newUser._doc,
+        token: newUser.generateAuthToken()
+      };
+
     } catch (error) {
       throw error;
     }
   },
 
+  signIn: async args => {
+    try {
+
+      const { email, password } = args.userInput;
+
+      const user = await User.findOne({ email });
+      if (!user) throw new Error("User not found")
+
+      const pwdMatch = await bcrypt.compare(password, user.password);
+      if (!pwdMatch) throw new Error("Password doesn't match");
+
+      return {
+        userId: user._id,
+        token: user.generateAuthToken()
+      }
+
+    } catch (err) {
+      throw err;
+    }
+  },
+
   getTickets: async () => {
     try {
+
       const tickets = await Ticket.find();
 
       return tickets.map(t => {
         if (!t.assignee) return mapTicketData(t);
 
-        return mapTicketData(t, true)
+        return mapTicketData(t);
       });
+
     } catch (err) {
       throw err;
     }
@@ -117,19 +151,24 @@ const resolver = {
 
   getTicket: async ({ ticketId }) => {
     try {
+
       const ticket = await Ticket.findById(ticketId);
       if (!ticket) throw new Error("Ticket not found!");
 
       if (!ticket.assignee) return mapTicketData(ticket);
 
-      return mapTicketData(ticket, true);
+      return mapTicketData(ticket);
+
     } catch (err) {
       throw err;
     }
   },
 
-  assignTicket: async ({ userEmail, ticketId }) => {
+  assignTicket: async ({ userEmail, ticketId }, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     try {
+
       const user = await User.findOne({ email: userEmail });
       const ticket = await Ticket.findById(ticketId);
 
