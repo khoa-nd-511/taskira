@@ -1,0 +1,12 @@
+.side-list a {
+  text-decoration: none;
+  background-color: transparent;
+}
+
+.side-list a.active > div,
+.side-list a:active > div,
+.side-list a:hover > div {
+  text-decoration: none;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
