@@ -19,7 +19,8 @@ import {
   Dashboard,
   CreateOutlined,
   TableChartOutlined,
-  AccountCircleOutlined
+  AccountCircleOutlined,
+  ExitToAppOutlined
 } from '@material-ui/icons';
 
 const styles = {
@@ -34,19 +35,27 @@ const styles = {
 class SideDrawer extends Component {
 
   state = {
-    openSideDrawer: false
+    openSideDrawer: false,
+    token: null
   }
 
   toggleSideDrawer = open => {
     this.setState({ openSideDrawer: open })
   }
 
+  componentDidMount() {
+    const token = localStorage.getItem('token');
+
+    this.setState({ token })
+  }
+
   render() {
     const { classes } = this.props;
 
+    const isLogin = this.state.token !== null;
+
     const sideList = (
       <div className={[classes.list, "side-list"].join(' ')} >
-
         <List>
           <NavLink to="/" exact>
             <ListItem button>
@@ -69,15 +78,31 @@ class SideDrawer extends Component {
 
           <Divider />
 
-          <NavLink to="/login">
-            <ListItem button>
-              <AccountCircleOutlined />
-              <ListItemText primary="Login" />
-            </ListItem>
-          </NavLink>
+          {isLogin
+            ? (
+              <React.Fragment>
+                <NavLink to="/me">
+                  <ListItem button>
+                    <AccountCircleOutlined />
+                    <ListItemText primary="My Account" />
+                  </ListItem>
+                </NavLink> <NavLink to="/logout">
+                  <ListItem button>
+                    <ExitToAppOutlined />
+                    <ListItemText primary="Logout" />
+                  </ListItem>
+                </NavLink>
+              </React.Fragment>
+            )
+            : (
+              <NavLink to="/login">
+                <ListItem button>
+                  <AccountCircleOutlined />
+                  <ListItemText primary="Login" />
+                </ListItem>
+              </NavLink>
+            )}
         </List>
-
-
       </div>
     )
 

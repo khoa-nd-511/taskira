@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
+import { Redirect } from 'react-router-dom';
 
 import { AccountCircleSharp } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
@@ -9,9 +10,12 @@ import {
   CssBaseline,
   Button,
   Avatar
-} from '@material-ui/core'
+} from '@material-ui/core';
+
+import { withSnackbar } from 'notistack'
 
 import Form from '../../components/Form/Form';
+// import AlertSnackbar from '../../components/UI/AlertSnackbar/AlertSnackbar';
 
 const styles = theme => ({
   main: {
@@ -77,7 +81,8 @@ export class Auth extends Component {
             reference: this.pwdElem
           }
         }
-      }
+      },
+      token: null
     }
   }
 
@@ -101,25 +106,39 @@ export class Auth extends Component {
     fetch('http://localhost:5000/graphql', {
       method: 'POST',
       body: JSON.stringify(reqBody),
-      headers: {'Content-Type': 'application/json'}
+      headers: { 'Content-Type': 'application/json' }
     })
       .then(res => res.json())
       .then(data => {
         if (data.errors) {
-          console.log(data.errors[0].message)
+          this.props.enqueueSnackbar(data.errors[0].message, {
+            variant: 'warning',
+          });
         } else {
-          console.log(data.data)
           localStorage.setItem('token', data.data.signIn.token)
+          this.props.enqueueSnackbar('Login successfully', {
+            variant: 'success',
+          });
+          this.props.history.push('/')
         }
       })
       .catch(err => console.log(err))
+  };
+
+  componentDidMount() {
+    const token = localStorage.getItem('token');
+
+    this.setState({ token })
   }
 
   render() {
     const { classes } = this.props;
 
+    const isLogin = this.state.token !== null;
+
     return (
       <main className={classes.main}>
+        {isLogin && <Redirect to="/" />}
         <CssBaseline />
 
         <Paper className={classes.paper}>
@@ -157,7 +176,7 @@ export class Auth extends Component {
 }
 
 Auth.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(Auth)
+export default withSnackbar(withStyles(styles)(Auth));
