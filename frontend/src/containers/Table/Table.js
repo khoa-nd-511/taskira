@@ -59,7 +59,9 @@ export class TicketTable extends Component {
   componentDidMount() {
     this._isMounted = true;
 
-    this.props.onLoadTickets();
+    if (!this.props.tickets.length) {
+      this.props.onLoadTickets();
+    }
   }
 
   componentWillUnmount() {
