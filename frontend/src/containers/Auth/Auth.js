@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
 
+import * as actions from '../../store/actions/index';
 import { AccountCircleSharp } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import {
@@ -12,10 +14,9 @@ import {
   Avatar
 } from '@material-ui/core';
 
-import { withSnackbar } from 'notistack'
+import { withSnackbar } from 'notistack';
 
 import Form from '../../components/Form/Form';
-// import AlertSnackbar from '../../components/UI/AlertSnackbar/AlertSnackbar';
 
 const styles = theme => ({
   main: {
@@ -81,8 +82,7 @@ export class Auth extends Component {
             reference: this.pwdElem
           }
         }
-      },
-      token: null
+      }
     }
   }
 
@@ -92,49 +92,27 @@ export class Auth extends Component {
     const email = this.state.form.fields.email.reference.current.value;
     const password = this.state.form.fields.password.reference.current.value;
 
-    const reqBody = {
-      query: `
-        query {
-          signIn(userInput: {email: "${email}", password: "${password}"}) {
-            userId
-            token
-          }
-        }
-      `
-    }
-
-    fetch('http://localhost:5000/graphql', {
-      method: 'POST',
-      body: JSON.stringify(reqBody),
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.errors) {
-          this.props.enqueueSnackbar(data.errors[0].message, {
-            variant: 'warning',
-          });
-        } else {
-          localStorage.setItem('token', data.data.signIn.token)
-          this.props.enqueueSnackbar('Login successfully', {
-            variant: 'success',
-          });
-          this.props.history.push('/')
-        }
-      })
-      .catch(err => console.log(err))
+    this.props.onCheckAuth(email, password);
   };
 
-  componentDidMount() {
-    const token = localStorage.getItem('token');
-
-    this.setState({ token })
+  componentWillUnmount() {
+    if(this.props.isLoggedIn) {
+      this.props.enqueueSnackbar('Signed in successfully', {
+        variant: 'success'
+      })
+    }
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, error, token } = this.props;
 
-    const isLogin = this.state.token !== null;
+    const isLogin = token !== null;
+
+    if (error) {
+      this.props.enqueueSnackbar(error.message, {
+        variant: 'warning'
+      })
+    };
 
     return (
       <main className={classes.main}>
@@ -179,4 +157,19 @@ Auth.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withSnackbar(withStyles(styles)(Auth));
+const mapStateToProps = state => {
+  return {
+    token: state.token,
+    userId: state.userId,
+    error: state.error,
+    isLoggedIn: state.isLoggedIn
+  }
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onCheckAuth: (e, p) => dispatch(actions.checkAuth(e, p)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withSnackbar(withStyles(styles)(Auth)));

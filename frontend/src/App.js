@@ -6,6 +6,7 @@ import CreateTicketForm from './containers/CreateTicketForm/CreateTicketForm'
 import Board from './containers/Board/Board'
 import Table from './containers/Table/Table'
 import Layout from './hoc/Layout/Layout';
+import Logout from './containers/Auth/Logout'
 
 class App extends Component {
   render() {
@@ -16,6 +17,7 @@ class App extends Component {
             <Route path="/board" component={Board} />
             <Route path="/create" component={CreateTicketForm} />
             <Route path="/login" component={Auth} />
+            <Route path="/logout" component={Logout} />
             <Route exact path="/" component={Table} />
           </Switch>
         </Layout>

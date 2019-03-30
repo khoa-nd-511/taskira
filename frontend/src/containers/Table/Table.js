@@ -1,6 +1,10 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux';
+
+import { withSnackbar } from 'notistack';
 
 export class Table extends Component {
+  state = {};
   render() {
     return (
       <div>
@@ -10,4 +14,10 @@ export class Table extends Component {
   }
 }
 
-export default Table
+const mapStateToProps = state => {
+  return {
+    isLoggedIn: state.isLoggedIn
+  }
+}
+
+export default connect(mapStateToProps, null)(withSnackbar(Table));

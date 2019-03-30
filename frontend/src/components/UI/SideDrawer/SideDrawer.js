@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
 import './SideDrawer.css';
@@ -52,7 +53,7 @@ class SideDrawer extends Component {
   render() {
     const { classes } = this.props;
 
-    const isLogin = this.state.token !== null;
+    const isLogin = this.props.token !== null;
 
     const sideList = (
       <div className={[classes.list, "side-list"].join(' ')} >
@@ -86,7 +87,8 @@ class SideDrawer extends Component {
                     <AccountCircleOutlined />
                     <ListItemText primary="My Account" />
                   </ListItem>
-                </NavLink> <NavLink to="/logout">
+                </NavLink>
+                <NavLink to="/logout">
                   <ListItem button>
                     <ExitToAppOutlined />
                     <ListItemText primary="Logout" />
@@ -135,4 +137,10 @@ SideDrawer.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SideDrawer);
+const mapStateToProps = state => {
+  return {
+    token: state.token
+  }
+}
+
+export default connect(mapStateToProps, null)(withStyles(styles)(SideDrawer));

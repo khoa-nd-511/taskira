@@ -1,0 +1,6 @@
+export const CHECK_AUTH = 'CHECK_AUTH'
+export const CHECK_AUTH_START = 'CHECK_AUTH_START'
+export const CHECK_AUTH_SUCCESS = 'CHECK_AUTH_SUCCESS'
+export const CHECK_AUTH_FAIL = 'CHECK_AUTH_FAIL'
+export const CHECK_AUTO_LOGIN = 'CHECK_AUTO_LOGIN'
+export const LOG_OUT = 'LOG_OUT'
