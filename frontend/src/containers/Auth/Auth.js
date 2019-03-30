@@ -159,10 +159,10 @@ Auth.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    token: state.token,
-    userId: state.userId,
-    error: state.error,
-    isLoggedIn: state.isLoggedIn
+    token: state.auth.token,
+    userId: state.auth.userId,
+    error: state.auth.error,
+    isLoggedIn: state.auth.isLoggedIn
   }
 };
 

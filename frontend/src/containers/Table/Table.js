@@ -15,6 +15,7 @@ import {
   Paper
 } from '@material-ui/core';
 
+import * as actions from '../../store/actions'
 import TicketTablePagination from './TicketTablePagination/TicketTablePagination';
 import Spinner from '../../components/UI/Spinner/Spinner';
 
@@ -36,9 +37,8 @@ export class TicketTable extends Component {
     super(props);
 
     this.state = {
-      rows: [],
       page: 0,
-      rowsPerPage: 5
+      rowsPerPage: 4
     };
   }
 
@@ -59,40 +59,7 @@ export class TicketTable extends Component {
   componentDidMount() {
     this._isMounted = true;
 
-    const reqBody = {
-      query: `
-        query {
-          getTickets {
-            title
-            description
-            hiPri
-            label
-            creator {
-              email
-            }
-          }
-        }`
-    };
-
-    fetch('http://localhost:5000/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reqBody)
-    })
-      .then(data => data.json())
-      .then(tickets => {
-        const rowsData = [];
-
-        for (const [i, ticket] of tickets.data.getTickets.entries()) {
-          rowsData.push(
-            this.createData(i + 1, ticket)
-          )
-        }
-        if (this._isMounted) {
-          this.setState({ rows: rowsData })
-        }
-      })
-      .catch(err => console.log(err))
+    this.props.onLoadTickets();
   }
 
   componentWillUnmount() {
@@ -100,12 +67,27 @@ export class TicketTable extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { rows, page, rowsPerPage } = this.state
+    const { classes, tickets, loading } = this.props;
+    const { page, rowsPerPage } = this.state
     let bodyRows = null;
+    const rowsData = [];
+    let table = null;
 
-    if (rows.length > 0) {
-      bodyRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(r => {
+    if (this.props.error) {
+      table = <p>Please try refresh the page!!!</p>
+      this.props.enqueueSnackbar('Something went wrong ...:(', {
+        variant: 'danger'
+      })
+    } else {
+      for (const [i, t] of tickets.entries()) {
+        rowsData.push(
+          this.createData(i + 1, t)
+        )
+      }
+    }
+
+    if (rowsData.length > 0) {
+      bodyRows = rowsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(r => {
         return (
           <TableRow key={r.id}>
             <TableCell>{r.title}</TableCell>
@@ -118,7 +100,7 @@ export class TicketTable extends Component {
       })
     }
 
-    let table = (
+    table = (
       <Paper className={classes.root}>
         <Table className={classes.table}>
           <TableHead>
@@ -137,7 +119,7 @@ export class TicketTable extends Component {
             <TableRow>
               <TablePagination
                 rowsPerPageOptions={[4, 8, 12]}
-                count={rows.length}
+                count={rowsData.length}
                 rowsPerPage={+rowsPerPage}
                 page={page}
                 SelectProps={{
@@ -153,7 +135,7 @@ export class TicketTable extends Component {
       </Paper>
     );
 
-    if (!rows.length) {
+    if (loading) {
       table = <Spinner />
     }
 
@@ -167,8 +149,17 @@ TicketTable.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    isLoggedIn: state.isLoggedIn
+    isLoggedIn: state.auth.isLoggedIn,
+    tickets: state.ticket.tickets,
+    loading: state.ticket.loading,
+    ticketError: state.ticket.error,
   }
 }
 
-export default connect(mapStateToProps, null)(withStyles(styles)(withSnackbar(TicketTable)));
+const mapDispatchToProps = dispatch => {
+  return {
+    onLoadTickets: () => dispatch(actions.loadTickets())
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(withSnackbar(TicketTable)));

@@ -9,7 +9,7 @@ const initialState = {
   isLoggedIn: false
 };
 
-export const root = (state = initialState, action) => {
+const root = (state = initialState, action) => {
   switch (action.type) {
     case actions.CHECK_AUTH_START:
       return {

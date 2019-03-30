@@ -18,7 +18,7 @@ export class Logout extends Component {
   }
 
   render() {
-    return <Redirect to="/" />
+    return <Redirect to="/login" />
   }
 }
 

@@ -5,15 +5,21 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import thunk from 'redux-thunk';
-import { createStore, applyMiddleware, compose } from 'redux';
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 
 import authReducer from './store/reducers/auth';
+import ticketReducer from './store/reducers/ticket';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
+const rootReducer = combineReducers({
+  auth: authReducer,
+  ticket: ticketReducer
+})
+
 const store = createStore(
-  authReducer,
+  rootReducer,
   composeEnhancers(applyMiddleware(thunk))
 );
 
