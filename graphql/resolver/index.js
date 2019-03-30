@@ -3,40 +3,52 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const config = require('config');
 const Fawn = require('fawn');
+const DataLoader = require('dataloader');
+
+Fawn.init(mongoose);
+
+const ticketLoader = new DataLoader((ticketIds) => {
+  return queryTickets(ticketIds);
+});
+
+const userLoader = new DataLoader((userIds) => {
+  return User.find({ _id: { $in: userIds } })
+})
 
 const Ticket = require('../../models/ticket');
 const User = require('../../models/user');
 
-Fawn.init(mongoose);
-
-const mapTicketData = (ticketData) => {
-  let mappedTicketData = {
+const mapTicketData = (ticketData, hasAssignee = false) => {
+  let mappedTicketData = null;
+  if (hasAssignee) {
+    mappedTicketData = {
+      ...ticketData._doc,
+      _id: ticketData._id,
+      creator: queryUser.bind(this, ticketData.creator.toString()),
+      assignee: queryUser.bind(this, ticketData.assignee.toString())
+    };
+  };
+  mappedTicketData = {
     ...ticketData._doc,
-    creator: queryUser.bind(this, ticketData.creator)
+    _id: ticketData._id,
+    creator: queryUser.bind(this, ticketData.creator.toString()),
   };
 
-  if (ticketData.assignee) {
-    return {
-      ...mappedTicketData,
-      assignee: queryUser.bind(this, ticketData.assignee)
-    }
-  };
-
-  return mappedTicketData;
+  return mappedTicketData
 };
 
 const mapUserData = (userData) => {
   return {
     ...userData._doc,
-    createdTickets: queryTickets.bind(this, userData.createdTickets),
-    assignedTickets: queryTickets.bind(this, userData.assignedTickets)
+    createdTickets: () => ticketLoader.loadMany(userData.createdTickets),
+    assignedTickets: () => ticketLoader.loadMany(this, userData.assignedTickets)
   };
 }
 
 const queryUser = async userId => {
   try {
 
-    const user = await User.findById(userId);
+    const user = await userLoader.load(userId.toString());
 
     return mapUserData(user);
 
@@ -47,10 +59,13 @@ const queryUser = async userId => {
 
 const queryTickets = async ticketIds => {
   try {
-
     const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
-    return tickets.map(t => mapTicketData(t));
+    return tickets.map(t => {
+      if (!t.assignee) return mapTicketData(t)
+
+      return mapTicketData(t, true)
+    });
 
   } catch (error) {
     throw error
@@ -141,7 +156,7 @@ const resolver = {
       return tickets.map(t => {
         if (!t.assignee) return mapTicketData(t);
 
-        return mapTicketData(t);
+        return mapTicketData(t, true);
       });
 
     } catch (err) {
@@ -157,7 +172,7 @@ const resolver = {
 
       if (!ticket.assignee) return mapTicketData(ticket);
 
-      return mapTicketData(ticket);
+      return mapTicketData(ticket, true);
 
     } catch (err) {
       throw err;
