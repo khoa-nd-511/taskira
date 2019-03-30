@@ -30,10 +30,16 @@ const styles = theme => ({
 });
 
 export class TicketTable extends Component {
-  state = {
-    rows: [],
-    page: 0,
-    rowsPerPage: 5
+  _isMounted = false
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      rows: [],
+      page: 0,
+      rowsPerPage: 5
+    };
   }
 
   createData = (id, ticketsData) => {
@@ -50,7 +56,8 @@ export class TicketTable extends Component {
     this.setState({ page: 0, rowsPerPage: e.target.value });
   };
 
-  componentWillMount() {
+  componentDidMount() {
+    this._isMounted = true;
 
     const reqBody = {
       query: `
@@ -81,10 +88,15 @@ export class TicketTable extends Component {
             this.createData(i + 1, ticket)
           )
         }
-
-        this.setState({ rows: rowsData })
+        if (this._isMounted) {
+          this.setState({ rows: rowsData })
+        }
       })
       .catch(err => console.log(err))
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   render() {
