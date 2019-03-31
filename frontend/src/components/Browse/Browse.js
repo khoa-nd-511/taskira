@@ -10,9 +10,9 @@ import Spinner from '../UI/Spinner/Spinner';
 
 export class Browse extends Component {
   componentDidMount = () => {
-    const currentTicket = JSON.parse(localStorage.getItem('selectedTicket'))
-    if ( currentTicket !== null ) {
-      this.props.onBrowseTicket(currentTicket._id);
+    const currentTicketId = JSON.parse(localStorage.getItem('selectedTicket'))
+    if (currentTicketId !== null) {
+      this.props.onBrowseTicket(currentTicketId);
     }
   }
 
@@ -24,13 +24,13 @@ export class Browse extends Component {
 
     let ticketDetail = null;
 
-    if (this.props.selectedTicket !== null) {
-      ticketDetail = <p>{this.props.selectedTicket.title}</p>
-      localStorage.setItem('selectedTicket', JSON.stringify(this.props.selectedTicket))
-    } else if (this.props.loading) {
+    if (this.props.loading) {
       ticketDetail = <Spinner />
-    } else {
+    } else if (!this.props.selectedTicket) {
       ticketDetail = <p>Browse ticket failed ...</p>
+    } else {
+      ticketDetail = <p>{this.props.selectedTicket.title}</p>
+      localStorage.setItem('selectedTicket', JSON.stringify(this.props.selectedTicket._id))
     }
 
     return (

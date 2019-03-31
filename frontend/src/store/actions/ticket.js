@@ -59,19 +59,12 @@ export const loadTicketsSuccess = tickets => {
 }
 
 export const browseTicket = (ticketId) => {
-  const currentTicket = JSON.parse(localStorage.getItem('selectedTicket'));
 
   return dispatch => {
     dispatch(startBrowsingTicket());
 
-    if (currentTicket !== null) {
-      localStorage.setItem('selectedTicket', JSON.stringify(currentTicket))
-      dispatch(browseTicketSuccess(currentTicket));
-
-    } else {
-
-      const reqBody = {
-        query: `
+    const reqBody = {
+      query: `
           query BrowseTicket($ticketId: ID!) {
             getTicket(ticketId: $ticketId) {
               _id
@@ -88,26 +81,25 @@ export const browseTicket = (ticketId) => {
               }
             },
           }`,
-        variables: {
-          ticketId
-        }
-      };
+      variables: {
+        ticketId
+      }
+    };
 
-      fetch('http://localhost:5000/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reqBody)
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqBody)
+    })
+      .then(data => data.json())
+      .then(res => {
+        if (res.errors) {
+          dispatch(browseTicketFailed(res.errors[0]))
+        } else {
+          localStorage.setItem('selectedTicket', JSON.stringify(res.data.getTicket._id))
+          dispatch(browseTicketSuccess(res.data.getTicket))
+        }
       })
-        .then(data => data.json())
-        .then(res => {
-          if (res.errors) {
-            dispatch(browseTicketFailed(res.errors[0]))
-          } else {
-              localStorage.setItem('selectedTicket', JSON.stringify(res.data.getTicket))
-            dispatch(browseTicketSuccess(res.data.getTicket))
-          }
-        })
-    }
   }
 }
 
