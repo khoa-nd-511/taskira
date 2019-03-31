@@ -8,10 +8,12 @@ export const loadTickets = () => {
       query: `
         query {
           getTickets {
+            _id
             title
             description
             hiPri
             label
+            createdDate
             creator {
               email
             }

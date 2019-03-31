@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 
 import { withSnackbar } from 'notistack';
 import { withStyles } from '@material-ui/core/styles';
@@ -43,9 +44,10 @@ export class TicketTable extends Component {
   }
 
   createData = (id, ticketsData) => {
-    const { title, description, hiPri, label, creator } = ticketsData;
+    const { title, createdDate, hiPri, label, creator } = ticketsData;
     const creatorEmail = creator.email;
-    return { id, title, description, hiPri, label, creatorEmail };
+
+    return { id, title, createdDate, hiPri, label, creatorEmail };
   }
 
   onChangePageHandler = (_, page) => {
@@ -74,6 +76,10 @@ export class TicketTable extends Component {
     let bodyRows = null;
     const rowsData = [];
     let table = null;
+    const titleStyle = {
+      fontWeight: 'bold',
+      textDecoration: 'none'
+    };
 
     if (this.props.error) {
       table = <p>Please try refresh the page!!!</p>
@@ -81,19 +87,28 @@ export class TicketTable extends Component {
         variant: 'danger'
       })
     } else {
-      for (const [i, t] of tickets.entries()) {
+      for (const t of tickets) {
         rowsData.push(
-          this.createData(i + 1, t)
+          this.createData(t._id, t)
         )
       }
     }
 
     if (rowsData.length > 0) {
       bodyRows = rowsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(r => {
+        const displayingDate = new Date(+r.createdDate).toLocaleDateString()
         return (
           <TableRow key={r.id}>
-            <TableCell>{r.title}</TableCell>
-            <TableCell>{r.description}</TableCell>
+            <TableCell>
+              <NavLink
+                to="/browse"
+                style={titleStyle}
+                onClick={() => this.props.onBrowseTicket(r.id)}
+              >
+                {r.title}
+              </NavLink>
+            </TableCell>
+            <TableCell>{displayingDate.toString()}</TableCell>
             <TableCell>{r.hiPri ? 'Urgent' : 'Normal'}</TableCell>
             <TableCell>{r.label}</TableCell>
             <TableCell>{r.creatorEmail}</TableCell>
@@ -108,7 +123,7 @@ export class TicketTable extends Component {
           <TableHead>
             <TableRow>
               <TableCell>Title</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Created At</TableCell>
               <TableCell>Priority</TableCell>
               <TableCell>Label</TableCell>
               <TableCell>Creator</TableCell>
@@ -160,7 +175,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onLoadTickets: () => dispatch(actions.loadTickets())
+    onLoadTickets: () => dispatch(actions.loadTickets()),
+    onBrowseTicket: id => dispatch(actions.browseTicket(id))
   }
 }
 
