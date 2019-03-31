@@ -5,5 +5,7 @@ export {
 } from './auth';
 
 export {
-  loadTickets
+  loadTickets,
+  browseTicket,
+  clearCurrentSelectedTicket
 } from './ticket'

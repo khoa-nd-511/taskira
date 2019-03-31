@@ -3,7 +3,8 @@ import * as actions from '../actions/actionTypes';
 const initialState = {
   tickets: [],
   error: null,
-  loading: false
+  loading: false,
+  selectedTicket: null
 };
 
 const root = (state = initialState, action) => {
@@ -30,6 +31,34 @@ const root = (state = initialState, action) => {
         tickets: action.tickets
       }
   
+    case actions.START_BROWSING_TICKET:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      }
+  
+    case actions.BROWSE_TICKET_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        selectedTicket: action.selectedTicket
+      }
+  
+    case actions.BROWSE_TICKET_FAILED:
+      return {
+        ...state,
+        loading: false,
+        error: action.error
+      }
+  
+    case actions.CLEAR_CURRENT_SELECTED_TICKET:
+      return {
+        ...state,
+        selectedTicket: null
+      }
+
     default:
       return state;
   }
