@@ -15,12 +15,16 @@ const ticketSchema = new Schema({
     type: Boolean,
     required: true
   },
+  label: {
+    type: String,
+    required: true
+  },
   createdDate: {
     type: Date,
     required: true
   },
-  label: {
-    type: String,
+  updatedDate: {
+    type: Date,
     required: true
   },
   creator: {
@@ -31,6 +35,12 @@ const ticketSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Comment'
+    }
+  ]
 });
 
 module.exports = mongoose.model('Ticket', ticketSchema);

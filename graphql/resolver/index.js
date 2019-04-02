@@ -34,7 +34,7 @@ const mapTicketData = (ticketData, hasAssignee = false) => {
     creator: queryUser.bind(this, ticketData.creator.toString()),
   };
 
-  return mappedTicketData
+  return mappedTicketData;
 };
 
 const mapUserData = (userData) => {
@@ -87,14 +87,17 @@ const resolver = {
         createdDate: new Date(args.ticketInput.createdDate)
       });
 
-      new Fawn.Task()
+      await new Fawn.Task()
         .save('tickets', ticket)
         .update('users', { _id: ticket.creator }, {
           $push: { createdTickets: ticket._id }
         })
         .run();
 
-      return mapTicketData(ticket);
+      return {
+        ...ticket._doc,
+        creator: queryUser(ticket.creator.toStrning())
+      };
 
     } catch (err) {
       throw err;
@@ -111,7 +114,7 @@ const resolver = {
 
       const hashedPwd = await bcrypt.hash(args.userInput.password, 12);
       const userObj = new User({
-        email: args.userInput.email,
+        ...args.userInput,
         password: hashedPwd
       });
 
@@ -189,7 +192,7 @@ const resolver = {
 
       new Fawn.Task()
         .update('tickets', { _id: ticket._id }, {
-          $set: { assignee: user }
+          $push: { assignee: user._id }
         })
         .update('users', { _id: user._id }, {
           $push: { assignedTickets: ticket._id }

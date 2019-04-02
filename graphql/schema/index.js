@@ -10,14 +10,27 @@ const schema = buildSchema(`
     creator: User!
     assignee: User
     createdDate: String!
+    updatedDate: String!
+    comments: [Comment]!
   }
 
   type User {
     _id: ID!
+    name: String!
     email: String!
     password: String
     createdTickets: [Ticket!]!
-    assignedTickets: Ticket!
+    assignedTickets: [Ticket]!
+    comments: [Comment]!
+  }
+
+  type Comment {
+    _id: ID!
+    userId: ID!
+    ticketId: ID!
+    content: String!
+    createdDate: String!
+    updatedDate: String!
   }
 
   type AuthData {
@@ -32,11 +45,13 @@ const schema = buildSchema(`
     label: String!
     creator: String!
     createdDate: String!
+    updatedDate: String!
   }
 
   input UserInput {
     email: String!
     password: String!
+    name: String!
   }
 
   type RootQuery {
