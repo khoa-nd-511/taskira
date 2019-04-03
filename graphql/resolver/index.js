@@ -190,9 +190,9 @@ const resolver = {
       const user = await User.findOne({ email: userEmail });
       const ticket = await Ticket.findById(ticketId);
 
-      new Fawn.Task()
-        .update('tickets', { _id: ticket._id }, {
-          $push: { assignee: user._id }
+      await new Fawn.Task()
+        .update('tickets', { _id: ticketData._id }, {
+          $push: { assignee: userData._id }
         })
         .update('users', { _id: user._id }, {
           $push: { assignedTickets: ticket._id }
