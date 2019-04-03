@@ -58,7 +58,7 @@ const schema = buildSchema(`
     getTickets: [Ticket!]!
     getTicket(ticketId: ID!): Ticket!
     getUser: User!
-    signIn(userInput: UserInput): AuthData!
+    signIn(email: String!, password: String!): AuthData!
   }
 
   type RootMutation {

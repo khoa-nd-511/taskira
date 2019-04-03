@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   if (!token || token == '') {
     req.isAuth = false;
-    next();
+    return next();
   }
 
   let decodedToken;
@@ -19,11 +19,11 @@ module.exports = (req, res, next) => {
     decodedToken = jwt.verify(token, config.get('jwtPrivateKey'));
   } catch (error) {
     req.isAuth = false;
-    next();
+    return next();
   }  
   if (!decodedToken) {
     req.isAuth = false;
-    next();
+     return next();
   }
 
   req.isAuth = true;

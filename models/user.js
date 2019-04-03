@@ -39,7 +39,7 @@ const userSchema = new Schema({
 });
 
 userSchema.methods.generateAuthToken = function() {
-  return jwt.sign({ _id: this._id, email: this.email }, config.get('jwtPrivateKey'));
+  return jwt.sign({ userId: this._id, email: this.email }, config.get('jwtPrivateKey'));
 }
 
 module.exports = mongoose.model('User', userSchema);

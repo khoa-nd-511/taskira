@@ -75,7 +75,6 @@ const queryTickets = async ticketIds => {
 const resolver = {
   createTicket: async (args, req) => {
     if (!req.isAuth) throw new Error("Unauthenticated");
-
     try {
 
       const ticket = new Ticket({
@@ -96,7 +95,7 @@ const resolver = {
 
       return {
         ...ticket._doc,
-        creator: queryUser(ticket.creator.toStrning())
+        creator: queryUser(ticket.creator.toString())
       };
 
     } catch (err) {
@@ -133,7 +132,7 @@ const resolver = {
   signIn: async args => {
     try {
 
-      const { email, password } = args.userInput;
+      const { email, password } = args;
 
       const user = await User.findOne({ email });
       if (!user) throw new Error("User not found")
@@ -187,15 +186,18 @@ const resolver = {
 
     try {
 
-      const user = await User.findOne({ email: userEmail });
-      const ticket = await Ticket.findById(ticketId);
+      const user = User.findOne({ email: userEmail });
+      const ticket = Ticket.findById(ticketId);
+
+      const metaData = await Promise.all([user, ticket]);
+      const [userData, ticketData] = metaData;
 
       await new Fawn.Task()
         .update('tickets', { _id: ticketData._id }, {
           $push: { assignee: userData._id }
         })
-        .update('users', { _id: user._id }, {
-          $push: { assignedTickets: ticket._id }
+        .update('users', { _id: userData._id }, {
+          $push: { assignedTickets: ticketData._id }
         })
 
       return {
