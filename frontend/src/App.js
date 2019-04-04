@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
 
 import Auth from './containers/Auth/Auth'
-import CreateTicketForm from './containers/CreateTicketForm/CreateTicketForm'
+import Add from './containers/Add/Add'
 import Board from './containers/Board/Board'
 import Table from './containers/Table/Table'
 import Layout from './hoc/Layout/Layout';
@@ -16,7 +16,7 @@ class App extends Component {
         <Layout>
           <Switch>
             <Route path="/board" component={Board} />
-            <Route path="/create" component={CreateTicketForm} />
+            <Route path="/create" component={Add} />
             <Route path="/login" component={Auth} />
             <Route path="/logout" component={Logout} />
             <Route path="/browse" component={Browse} />

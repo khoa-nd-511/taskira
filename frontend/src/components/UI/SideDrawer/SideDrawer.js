@@ -64,7 +64,7 @@ class SideDrawer extends Component {
               <ListItemText primary="Dashboard" />
             </ListItem>
           </NavLink>
-          <NavLink to="/add">
+          <NavLink to="/create">
             <ListItem button>
               <CreateOutlined />
               <ListItemText primary="Create Ticket" />
