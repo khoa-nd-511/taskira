@@ -129,7 +129,7 @@ export class Browse extends Component {
                       avatar={<Avatar><ErrorOutlineRounded /></Avatar>}
                       label={label}
                       className={[classes.chip, classes.customChip].join(' ')}
-                      color={label === 'Develop' ? "primary" : "secondary"}
+                      color={label === 'develop' ? "primary" : "secondary"}
                     />
                   </div>
 
