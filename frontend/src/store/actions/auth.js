@@ -6,7 +6,7 @@ export const checkAuth = (email, password) => {
   const reqBody = {
     query: `
         query {
-          signIn(userInput: {email: "${email}", password: "${password}"}) {
+          signIn(email: "${email}", password: "${password}") {
             userId
             token
           }
