@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 
 import Form from '../../components/Form/Form';
 
@@ -126,11 +128,11 @@ export class Create extends Component {
     fetch('http://localhost:5000/graphql', {
       method: 'POST',
       body: JSON.stringify(reqBody),
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`}
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     })
-    .then(data => data.json())
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
+      .then(data => data.json())
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
   }
 
   onSwitchHandler = value => {
@@ -147,7 +149,7 @@ export class Create extends Component {
 
   onSelectHandler = value => {
     const updatedLabel = { ...this.state.form.fields.label }
-    Object.keys(updatedLabel.options).forEach(l =>  {
+    Object.keys(updatedLabel.options).forEach(l => {
       if (value === l) {
         updatedLabel.options[l].selected = true;
       } else {
@@ -163,36 +165,60 @@ export class Create extends Component {
     })
   }
 
+  componentDidMount = () => {
+    if (!localStorage.getItem('token')) {
+      this.props.history.push('/login')
+    }
+  }
+
   render() {
     const { classes } = this.props;
+
     return (
-      <div className={classes.root}>
-        <div className={classes.header}>
-          <p style={{ margin: 0 }}>Create new ticket</p>
-        </div>
+      <React.Fragment>
+        {!localStorage.getItem('token') && <Redirect to="/login" />}
+
+        <div className={classes.root}>
+          <div className={classes.header}>
+            <p style={{ margin: 0 }}>Create new ticket</p>
+          </div>
 
 
-        <Paper className={classes.paper}>
-          <form className={classes.form} onSubmit={this.onSubmitHandler}>
-            <Form
-              formFields={this.state.form.fields}
-              switched={this.onSwitchHandler}
-              selected={this.onSelectHandler}
-            />
+          <Paper className={classes.paper}>
+            <form className={classes.form} onSubmit={this.onSubmitHandler}>
+              <Form
+                formFields={this.state.form.fields}
+                switched={this.onSwitchHandler}
+                selected={this.onSelectHandler}
+              />
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-            >
-              Submit
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+              >
+                Submit
             </Button>
-          </form>
-        </Paper>
-      </div>
-    )
+            </form>
+          </Paper>
+        </div>
+      </React.Fragment>
+    );
   }
 }
 
-export default withStyles(styles)(Create);
+const mapStateToProps = state => {
+  return {
+    token: state.auth.token,
+    userId: state.auth.userId
+  }
+}
+
+const mapDispatchtoProps = state => {
+  return {
+
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchtoProps)(withStyles(styles)(Create));
