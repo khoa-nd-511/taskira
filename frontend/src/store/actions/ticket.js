@@ -162,7 +162,6 @@ export const createTicket = ticketInputObj => {
           dispatch(createTicketFailed(res.errors[0]));
         } else {
           dispatch(createTicketSuccess(res.data.createTicket));
-          dispatch(loadTickets());
           dispatch(browseTicket(res.data.createTicket._id));
         }
       })

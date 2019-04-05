@@ -54,7 +54,8 @@ const root = (state = initialState, action) => {
 
     case actions.CREATE_TICKET_SUCCESS:
       return {
-        ...state
+        ...state,
+        tickets: []
       }
 
     default:
