@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 
+import * as actions from '../../store/actions'
 import Form from '../../components/Form/Form';
 
 import {
@@ -99,7 +100,6 @@ export class Create extends Component {
     const { fields } = this.state.form;
     const selectedLabel = Object.keys(fields.label.options).filter(o => fields.label.options[o].selected)[0];
     const currentUser = localStorage.getItem('userId');
-    const token = localStorage.getItem('token');
 
     const ticketInput = {
       title: this.titleRef.current.value,
@@ -111,28 +111,8 @@ export class Create extends Component {
       creator: currentUser
     }
 
-    const reqBody = {
-      query: `
-        mutation CreateTicket($ticketInput: TicketInput!) {
-          createTicket(ticketInput: $ticketInput) {
-            title
-            label
-          }
-        }
-      `,
-      variables: {
-        ticketInput
-      }
-    }
-
-    fetch('http://localhost:5000/graphql', {
-      method: 'POST',
-      body: JSON.stringify(reqBody),
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-    })
-      .then(data => data.json())
-      .then(res => console.log(res))
-      .catch(err => console.log(err))
+    this.props.onCreateTicket(ticketInput);
+    this.props.history.push('/browse');
   }
 
   onSwitchHandler = value => {
@@ -215,9 +195,10 @@ const mapStateToProps = state => {
   }
 }
 
-const mapDispatchtoProps = state => {
+const mapDispatchtoProps = dispatch => {
   return {
-
+    onCreateTicket: data => dispatch(actions.createTicket(data)),
+    onBrowseTicket: id => dispatch(actions.browseTicket(id))
   }
 }
 

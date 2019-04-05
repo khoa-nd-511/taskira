@@ -7,5 +7,6 @@ export {
 export {
   loadTickets,
   browseTicket,
-  clearCurrentSelectedTicket
+  clearCurrentSelectedTicket,
+  createTicket
 } from './ticket'

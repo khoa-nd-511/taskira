@@ -40,7 +40,7 @@ export const loadTickets = () => {
 
 export const startLoadingTickets = () => {
   return {
-    type: actions.START_LOADING_TICKETS
+    type: actions.START_ACTION
   }
 }
 
@@ -105,7 +105,7 @@ export const browseTicket = (ticketId) => {
 
 export const startBrowsingTicket = () => {
   return {
-    type: actions.START_BROWSING_TICKET
+    type: actions.START_ACTION
   }
 }
 
@@ -127,5 +127,65 @@ export const clearCurrentSelectedTicket = () => {
   localStorage.removeItem('selectedTicket')
   return {
     type: actions.CLEAR_CURRENT_SELECTED_TICKET
+  }
+}
+
+export const createTicket = ticketInputObj => {
+  return dispatch => {
+    dispatch(startCreatingTicket());
+
+    const token = localStorage.getItem('token');
+    const reqBody = {
+      query: `
+        mutation CreateTicket($ticketInput: TicketInput!) {
+          createTicket(ticketInput: $ticketInput) {
+            _id
+            title
+            label
+          }
+        }
+      `,
+      variables: {
+        ticketInput: ticketInputObj
+      }
+    }
+
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(reqBody),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+    })
+      .then(data => data.json())
+      .then(res => {
+        console.log(res)
+        if (res.errors) {
+          dispatch(createTicketFailed(res.errors[0]));
+        } else {
+          dispatch(createTicketSuccess(res.data.createTicket));
+          dispatch(loadTickets());
+          dispatch(browseTicket(res.data.createTicket._id));
+        }
+      })
+      .catch(err => dispatch(createTicketFailed(err)))
+  }
+}
+
+export const startCreatingTicket = () => {
+  return {
+    type: actions.START_ACTION
+  }
+}
+
+export const createTicketFailed = error => {
+  return {
+    type: actions.CREATE_TICKET_FAILED,
+    error
+  }
+}
+
+export const createTicketSuccess = ticket => {
+  return {
+    type: actions.CREATE_TICKET_SUCCESS,
+    ticket
   }
 }
