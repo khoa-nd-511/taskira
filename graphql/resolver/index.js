@@ -36,7 +36,7 @@ const mapUserData = (userData) => {
   return {
     ...userData._doc,
     createdTickets: () => ticketLoader.loadMany(userData.createdTickets),
-    assignedTickets: () => ticketLoader.loadMany(this, userData.assignedTickets)
+    assignedTickets: () => ticketLoader.loadMany(userData.assignedTickets)
   };
 }
 
@@ -54,6 +54,7 @@ const queryUser = async userId => {
 
 const queryTickets = async ticketIds => {
   try {
+
     const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
     return tickets.map(t => mapTicketData(t));
@@ -146,9 +147,7 @@ const resolver = {
 
       const tickets = await Ticket.find();
 
-      return tickets.map(t => {
-        return mapTicketData(t)
-      });
+      return tickets.map(t =>  mapTicketData(t));
 
     } catch (err) {
       throw err;
