@@ -75,7 +75,19 @@ const styles = theme => console.log(theme) || ({
 export class Browse extends Component {
   state = {
     currentTicket: null,
-    assigneeRef: React.createRef()
+    assigneeFieldObj: {
+      email: {
+        name: 'assignee',
+        type: 'email',
+        placeholder: 'Assign to ...',
+        validation: {
+          required: true,
+          pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
+        },
+        valid: false,
+        touched: false,
+      }
+    },
   };
 
   componentDidMount = () => {
@@ -89,8 +101,8 @@ export class Browse extends Component {
     this.props.onClearCurrentSelectedTicket();
   }
 
-  onInputHandler = e => {
-    console.log(this.state.assigneeRef.current.value)
+  onInputHandler = (e) => {
+    console.log(e.target.value)
   }
 
   render() {
@@ -116,23 +128,9 @@ export class Browse extends Component {
 
       let assigneeField = null;
       if (!assignee) {
-        const assigneeFieldObj = {
-          email: {
-            name: 'assignee',
-            type: 'email',
-            placeholder: 'Assign to ...',
-            validation: {
-              required: true,
-              pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
-            },
-            valid: false,
-            touched: false,
-            reference: this.state.assigneeRef
-          }
-        }
         assigneeField = (
           <form onInput={this.onInputHandler}>
-            <Form formFields={assigneeFieldObj} styles={{margin: 0}} />
+            <Form formFields={this.state.assigneeFieldObj} styles={{margin: 0}} />
           </form>
         )
       } else {
