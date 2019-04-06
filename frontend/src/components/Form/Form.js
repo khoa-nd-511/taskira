@@ -110,7 +110,7 @@ const formControl = props => {
     }
 
     return (
-      <FormControl margin="normal" required fullWidth key={name}>
+      <FormControl margin="normal" required fullWidth key={name} style={props.styles}>
         {input}
       </FormControl>)
   })

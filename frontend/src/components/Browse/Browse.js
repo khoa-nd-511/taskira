@@ -17,6 +17,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import * as actions from '../../store/actions';
 import Spinner from '../UI/Spinner/Spinner';
+import Form from "../Form/Form";
 
 const styles = theme => console.log(theme) || ({
   root: {
@@ -64,12 +65,17 @@ const styles = theme => console.log(theme) || ({
   centeringChildren: {
     display: 'flex',
     alignItems: 'center'
+  },
+  assigneeField: {
+    display: 'flex',
+    alignItems: 'baseline'
   }
 })
 
 export class Browse extends Component {
   state = {
-    currentTicket: null
+    currentTicket: null,
+    assigneeRef: React.createRef()
   };
 
   componentDidMount = () => {
@@ -83,6 +89,10 @@ export class Browse extends Component {
     this.props.onClearCurrentSelectedTicket();
   }
 
+  onInputHandler = e => {
+    console.log(this.state.assigneeRef.current.value)
+  }
+
   render() {
     const { classes } = this.props;
 
@@ -90,7 +100,7 @@ export class Browse extends Component {
 
     if (this.props.loading) {
       ticketDetail = <Spinner />
-    } else if (!this.props.selectedTicket) {
+    } else if (!this.props.selectedTicket || this.props.error) {
       ticketDetail = 'Browse ticket failed ...'
     } else {
       localStorage.setItem('selectedTicket', JSON.stringify(this.props.selectedTicket._id));
@@ -103,6 +113,31 @@ export class Browse extends Component {
         createdDate,
         creator,
         assignee } = this.props.selectedTicket;
+
+      let assigneeField = null;
+      if (!assignee) {
+        const assigneeFieldObj = {
+          email: {
+            name: 'assignee',
+            type: 'email',
+            placeholder: 'Assign to ...',
+            validation: {
+              required: true,
+              pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
+            },
+            valid: false,
+            touched: false,
+            reference: this.state.assigneeRef
+          }
+        }
+        assigneeField = (
+          <form onInput={this.onInputHandler}>
+            <Form formFields={assigneeFieldObj} styles={{margin: 0}} />
+          </form>
+        )
+      } else {
+        assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
+      }
 
       ticketDetail = (
         <Grid container spacing={16} className={classes.root}>
@@ -162,7 +197,7 @@ export class Browse extends Component {
               <Grid item xs={12}>
                 <Paper className={classes.paper}>
                   <p><b>Reporter:</b> {creator.email}</p>
-                  <p><b>Assignee:</b> {assignee ? assignee.email : null}</p>
+                  {assigneeField}
                   <p><b>Created At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
                   <p><b>Updated At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
                 </Paper>
