@@ -17,7 +17,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import * as actions from '../../store/actions';
 import Spinner from '../UI/Spinner/Spinner';
-import Form from "../Form/Form";
+import Autocomplete from "../Form/Autocomplete/Autocomplete";
 
 const styles = theme => console.log(theme) || ({
   root: {
@@ -76,17 +76,16 @@ export class Browse extends Component {
   state = {
     currentTicket: null,
     assigneeFieldObj: {
-      email: {
-        name: 'assignee',
-        type: 'email',
-        placeholder: 'Assign to ...',
-        validation: {
-          required: true,
-          pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
-        },
-        valid: false,
-        touched: false,
-      }
+      name: 'assignee',
+      type: 'email',
+      placeholder: 'Assign to email',
+      validation: {
+        required: true,
+        pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
+      },
+      valid: false,
+      touched: false,
+
     },
   };
 
@@ -99,10 +98,6 @@ export class Browse extends Component {
 
   componentWillUnmount() {
     this.props.onClearCurrentSelectedTicket();
-  }
-
-  onInputHandler = (e) => {
-    console.log(e.target.value)
   }
 
   render() {
@@ -128,11 +123,7 @@ export class Browse extends Component {
 
       let assigneeField = null;
       if (!assignee) {
-        assigneeField = (
-          <form onInput={this.onInputHandler}>
-            <Form formFields={this.state.assigneeFieldObj} styles={{margin: 0}} />
-          </form>
-        )
+        assigneeField = <Autocomplete data={this.state.assigneeFieldObj} />
       } else {
         assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
       }
@@ -194,7 +185,7 @@ export class Browse extends Component {
             <Grid container>
               <Grid item xs={12}>
                 <Paper className={classes.paper}>
-                  <p><b>Reporter:</b> {creator.email}</p>
+                  <p style={{ marginBottom: 0 }}><b>Reporter:</b> {creator.email}</p>
                   {assigneeField}
                   <p><b>Created At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
                   <p><b>Updated At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
