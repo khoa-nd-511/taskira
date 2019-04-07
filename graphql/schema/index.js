@@ -59,6 +59,7 @@ const schema = buildSchema(`
     getTicket(ticketId: ID!): Ticket!
     getUser: User!
     signIn(email: String!, password: String!): AuthData!
+    searchUsers(text: String!): [User]!
   }
 
   type RootMutation {
