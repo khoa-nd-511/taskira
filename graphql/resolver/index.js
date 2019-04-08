@@ -199,7 +199,7 @@ const resolver = {
     try {
       if (text === '') return [];
 
-      const regexPattern = new RegExp(`^${text}`, 'gi');
+      const regexPattern = new RegExp(`.*${text}`, 'gi');
       const foundUsers = await User.find({ email: { $regex: regexPattern } });
 
       return foundUsers.map(u => mapUserData(u));
