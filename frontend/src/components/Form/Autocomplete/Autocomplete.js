@@ -1,6 +1,11 @@
 import React, { Component } from 'react'
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, tap, switchMap, skipWhile } from 'rxjs/operators';
+import { Subject, empty } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  tap,
+  switchMap,
+} from 'rxjs/operators';
 
 import { InputLabel, Input, FormControl } from '@material-ui/core';
 
@@ -11,6 +16,11 @@ export default class Autocomplete extends Component {
   state = {
     suggestions: [],
     searchPlaceholder: '',
+  }
+
+  resetState = () => {
+    this.setState({ suggestions: [], searchPlaceholder: '' });
+    return empty();
   }
 
   fetchUsersByEmail = text => {
@@ -36,18 +46,15 @@ export default class Autocomplete extends Component {
 
   componentDidMount() {
     this.inputSource$ = this.inputSubject.pipe(
-      skipWhile(v => v.trim().length === 0),
-      tap(val => this.setState({ suggestions: [], searchPlaceholder: `Seaching for ${val}...`, })),
+      tap(val => this.setState({ suggestions: [], searchPlaceholder: `Seaching for ${val}...` })),
       debounceTime(500),
       distinctUntilChanged(),
+      switchMap(txt => txt !== '' ? this.fetchUsersByEmail(txt) : this.resetState()),
     );
 
-    this.inputSource$.pipe(
-      skipWhile(v =>v === ''),
-      switchMap(txt => this.fetchUsersByEmail(txt))
-    ).subscribe(({ data }) => {
+    this.inputSource$.subscribe(({ data }) => {
       const { searchUsers } = data;
-      this.setState({ suggestions: searchUsers, searchPlaceholder: '' })
+      this.setState({ suggestions: searchUsers, searchPlaceholder: '' });
     });
   }
 
@@ -66,6 +73,7 @@ export default class Autocomplete extends Component {
           name={type}
           type={type}
           onChange={e => this.inputSubject.next(e.target.value)}
+          autoComplete="off"
         />
         {this.state.searchPlaceholder !== '' ? <p style={{ textAlign: 'right' }}>{this.state.searchPlaceholder}</p> : null}
       </FormControl>
