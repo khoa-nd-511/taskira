@@ -1,10 +1,4 @@
-import React, { Component } from 'react'
-import { Subject, empty } from 'rxjs';
-import {
-  debounceTime,
-  tap,
-  switchMap,
-} from 'rxjs/operators';
+import React from 'react';
 
 import { withStyles } from '@material-ui/core/styles';
 import {
@@ -15,7 +9,6 @@ import {
   List,
   ListItemText,
   ListSubheader,
-  ClickAwayListener
 } from '@material-ui/core';
 
 const styles = theme => {
@@ -52,127 +45,57 @@ const styles = theme => {
     },
   }
 }
+const autocomplete = props => {
 
+  const { classes, inputChanged, suggestions, showList, searchingFor, inputFocused } = props;
+  const { placeholder, type } = props.data;
 
-class Autocomplete extends Component {
-  inputSubject = new Subject();
-  inputSource$ = null;
+  return (
+      <FormControl
+        margin="normal"
+        required
+        fullWidth
+        style={{ margin: 0 }}
+        className={classes.positionRelative}>
 
-  state = {
-    suggestions: [],
-    searchPlaceholder: '',
-    open: false
-  }
+        <InputLabel htmlFor={type}>{placeholder}</InputLabel>
+        <Input
+          id={type}
+          name={type}
+          type={type}
+          autoComplete="off"
+          onChange={e => inputChanged(e.target.value)}
+          onClick={inputFocused}
+        />
 
-  resetState = () => {
-    this.setState({ suggestions: [], searchPlaceholder: '', open: false });
-    return empty();
-  }
+        {(suggestions.length > 0 && showList) && (
+          <List
+            component="nav"
+            subheader={
+              <ListSubheader component="div">
+                {!suggestions.length
+                  ? 'Found no users..'
+                  : suggestions.length > 1
+                    ? `Found ${suggestions.length} users`
+                    : `Found 1 user`}
+              </ListSubheader>
+            }
+            className={[classes.list, classes.suggestions].join(' ')}
+          >
+            {suggestions.map(s => {
+              return (
+                <ListItem button key={s.email} onClick={() => { }}>
+                  <ListItemText inset primary={`${s.email} (${s.name})`} style={{ padding: 0 }} />
+                </ListItem>
+              )
+            })}
+          </List>
+        )}
 
-  fetchUsersByEmail = text => {
-    const reqBody = {
-      query: `
-        query SearchUsers($text: String!) {
-          searchUsers(text: $text) {
-            name
-            email
-          }
-        }`,
-      variables: {
-        text
-      }
-    }
-
-    return fetch('http://localhost:5000/graphql', {
-      method: 'POST',
-      body: JSON.stringify(reqBody),
-      headers: { 'Content-Type': 'application/json' }
-    }).then(data => data.json())
-  }
-
-  componentDidMount() {
-    this.inputSource$ = this.inputSubject.pipe(
-      tap(val => this.setState({ suggestions: [], searchPlaceholder: `Seaching for ${val}...`, open: false })),
-      debounceTime(250),
-      switchMap(txt => txt !== '' ? this.fetchUsersByEmail(txt) : this.resetState()),
-    );
-
-    this.inputSource$.subscribe(({ data }) => {
-      const { searchUsers } = data;
-      this.setState({
-        suggestions: searchUsers,
-        searchPlaceholder: '',
-        open: true
-      });
-    });
-  }
-
-  componentWillUnmount() {
-    this.inputSource$.unsubscribe()
-  }
-
-  handleClose = () => {
-    this.setState({ anchorEl: null });
-  };
-
-  handleClickAway = () => {
-    this.setState({
-      open: false,
-    });
-  }
-
-  render() {
-    const { classes } = this.props;
-    const { placeholder, type } = this.props.data;
-    const { suggestions, open } = this.state;
-
-    return (
-      <ClickAwayListener onClickAway={this.handleClickAway}>
-        <FormControl
-          margin="normal"
-          required
-          fullWidth
-          style={{ margin: 0 }}
-          className={classes.positionRelative}>
-
-          <InputLabel htmlFor={type}>{placeholder}</InputLabel>
-          <Input
-            id={type}
-            name={type}
-            type={type}
-            onChange={e => this.inputSubject.next(e.target.value)}
-            autoComplete="off"
-          />
-
-          {open > 0 && (
-            <List
-              component="nav"
-              subheader={
-                <ListSubheader component="div">
-                  {!suggestions.length
-                    ? 'Found no users..'
-                    : suggestions.length > 1 
-                      ? `Found ${suggestions.length} users`
-                      : `Found 1 user`}
-                </ListSubheader>
-              }
-              className={[classes.list, classes.suggestions].join(' ')}
-            >
-              {suggestions.map(s => {
-                return (
-                  <ListItem button key={s.email} onClick={() => { }}>
-                    <ListItemText inset primary={`${s.email} (${s.name})`} style={{padding: 0}} />
-                  </ListItem>
-                )
-              })}
-            </List>
-          )}
-
-          {this.state.searchPlaceholder !== '' ? <p style={{ textAlign: 'right' }}>{this.state.searchPlaceholder}</p> : null}
-        </FormControl>
-      </ClickAwayListener>
-    )
-  }
+        {searchingFor !== null ? <p style={{ textAlign: 'right' }}>Searching for {searchingFor}...</p> : null}
+      </FormControl>
+  )
 }
 
-export default withStyles(styles)(Autocomplete);
+
+export default withStyles(styles)(autocomplete);

@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
+import { Subject, empty } from 'rxjs';
+import {
+  debounceTime,
+  tap,
+  switchMap,
+} from 'rxjs/operators';
+
 import {
   Grid,
   Paper,
   Button,
   Chip,
-  Avatar
+  Avatar,
+  ClickAwayListener
 } from '@material-ui/core';
 import {
   ErrorOutlineRounded,
@@ -19,7 +27,7 @@ import * as actions from '../../store/actions';
 import Spinner from '../UI/Spinner/Spinner';
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
 
-const styles = theme => console.log(theme) || ({
+const styles = theme => ({
   root: {
     ...theme.typography.body1
   },
@@ -73,35 +81,82 @@ const styles = theme => console.log(theme) || ({
 })
 
 export class Browse extends Component {
+  inputSubject = new Subject();
+  inputSource$ = null;
+
   state = {
     currentTicket: null,
     assigneeFieldObj: {
       name: 'assignee',
       type: 'email',
       placeholder: 'Assign to email',
-      validation: {
-        required: true,
-        pattern: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/
-      },
-      valid: false,
-      touched: false,
-
     },
+    suggestions: [],
+    showList: false,
+    searchingFor: null,
   };
+
+  onHandleInputChanged = e => {
+    this.inputSubject.next(e);
+  }
+
+
+  handleClickAway = e => {
+    this.setState({ showList: false })
+  }
+
+  resetState = () => {
+    this.setState({ suggestions: [], showList: false, searchingFor: null });
+    return empty();
+  }
+
+  fetchUsersByEmail = text => {
+    const reqBody = {
+      query: `
+        query SearchUsers($text: String!) {
+          searchUsers(text: $text) {
+            name
+            email
+          }
+        }`,
+      variables: {
+        text
+      }
+    }
+
+    return fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(reqBody),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(data => data.json())
+  }
 
   componentDidMount = () => {
     const currentTicketId = JSON.parse(localStorage.getItem('selectedTicket'))
     if (currentTicketId !== null) {
       this.props.onBrowseTicket(currentTicketId);
     }
+
+    this.inputSource$ = this.inputSubject.pipe(
+      tap(val => this.setState({ suggestions: [], showList: false, searchingFor: val })),
+      debounceTime(250),
+      switchMap(txt => txt !== '' ? this.fetchUsersByEmail(txt) : this.resetState()),
+    );
+
+    this.inputSource$.subscribe(({ data }) => {
+      const { searchUsers } = data;
+      this.setState({ suggestions: searchUsers, showList: true, searchingFor: null });
+    });
   }
 
   componentWillUnmount() {
     this.props.onClearCurrentSelectedTicket();
+    this.inputSource$.unsubscribe();
   }
 
   render() {
     const { classes } = this.props;
+    const { suggestions, showList, searchingFor } = this.state;
 
     let ticketDetail = null;
 
@@ -123,7 +178,18 @@ export class Browse extends Component {
 
       let assigneeField = null;
       if (!assignee) {
-        assigneeField = <Autocomplete data={this.state.assigneeFieldObj} />
+        assigneeField = (
+          <ClickAwayListener onClickAway={this.handleClickAway}>
+            <Autocomplete
+              data={this.state.assigneeFieldObj}
+              inputChanged={this.onHandleInputChanged}
+              suggestions={suggestions}
+              showList={showList}
+              searchingFor={searchingFor === null ? null : searchingFor}
+              inputFocused={() => this.setState({ showList: true })}
+            />
+          </ClickAwayListener>
+        )
       } else {
         assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
       }
