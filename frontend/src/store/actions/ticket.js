@@ -1,8 +1,16 @@
 import * as actions from './actionTypes';
 
+
+export const startAction = () => {
+  return {
+    type: actions.START_ACTION
+  }
+}
+
+
 export const loadTickets = () => {
   return dispatch => {
-    dispatch(startLoadingTickets())
+    dispatch(startAction())
 
     const reqBody = {
       query: `
@@ -38,12 +46,6 @@ export const loadTickets = () => {
   }
 }
 
-export const startLoadingTickets = () => {
-  return {
-    type: actions.START_ACTION
-  }
-}
-
 export const loadTicketsFailed = error => {
   return {
     type: actions.LOAD_TICKETS_FAILED,
@@ -61,7 +63,7 @@ export const loadTicketsSuccess = tickets => {
 export const browseTicket = (ticketId) => {
 
   return dispatch => {
-    dispatch(startBrowsingTicket());
+    dispatch(startAction());
 
     const reqBody = {
       query: `
@@ -103,12 +105,6 @@ export const browseTicket = (ticketId) => {
   }
 }
 
-export const startBrowsingTicket = () => {
-  return {
-    type: actions.START_ACTION
-  }
-}
-
 export const browseTicketSuccess = ticket => {
   return {
     type: actions.BROWSE_TICKET_SUCCESS,
@@ -132,7 +128,7 @@ export const clearCurrentSelectedTicket = () => {
 
 export const createTicket = ticketInputObj => {
   return dispatch => {
-    dispatch(startCreatingTicket());
+    dispatch(startAction());
 
     const token = localStorage.getItem('token');
     const reqBody = {
@@ -166,12 +162,6 @@ export const createTicket = ticketInputObj => {
         }
       })
       .catch(err => dispatch(createTicketFailed(err)))
-  }
-}
-
-export const startCreatingTicket = () => {
-  return {
-    type: actions.START_ACTION
   }
 }
 
