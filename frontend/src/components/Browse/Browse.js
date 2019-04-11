@@ -93,7 +93,8 @@ export class Browse extends Component {
     },
     suggestions: [],
     showList: false,
-    searchingFor: null,
+    searchingFor: '',
+    textInput: '',
   };
 
   onHandleInputChanged = e => {
@@ -106,7 +107,7 @@ export class Browse extends Component {
   }
 
   resetState = () => {
-    this.setState({ suggestions: [], showList: false, searchingFor: null });
+    this.setState({ suggestions: [], showList: false, searchingFor: '' });
     return empty();
   }
 
@@ -131,6 +132,10 @@ export class Browse extends Component {
     }).then(data => data.json())
   }
 
+  onSelectAssignee = email => {
+    this.setState({ showList: false, textInput: email })
+  }
+
   componentDidMount = () => {
     const currentTicketId = JSON.parse(localStorage.getItem('selectedTicket'))
     if (currentTicketId !== null) {
@@ -138,14 +143,14 @@ export class Browse extends Component {
     }
 
     this.inputSource$ = this.inputSubject.pipe(
-      tap(val => this.setState({ suggestions: [], showList: false, searchingFor: val })),
+      tap(val => this.setState({ suggestions: [], showList: false, searchingFor: val, textInput: val })),
       debounceTime(250),
       switchMap(txt => txt !== '' ? this.fetchUsersByEmail(txt) : this.resetState()),
     );
 
     this.inputSource$.subscribe(({ data }) => {
       const { searchUsers } = data;
-      this.setState({ suggestions: searchUsers, showList: true, searchingFor: null });
+      this.setState({ suggestions: searchUsers, showList: true, searchingFor: '' });
     });
   }
 
@@ -156,7 +161,12 @@ export class Browse extends Component {
 
   render() {
     const { classes } = this.props;
-    const { suggestions, showList, searchingFor } = this.state;
+    const {
+      assigneeFieldObj,
+      suggestions,
+      showList,
+      searchingFor,
+      textInput } = this.state;
 
     let ticketDetail = null;
 
@@ -181,12 +191,14 @@ export class Browse extends Component {
         assigneeField = (
           <ClickAwayListener onClickAway={this.handleClickAway}>
             <Autocomplete
-              data={this.state.assigneeFieldObj}
+              data={assigneeFieldObj}
               inputChanged={this.onHandleInputChanged}
-              suggestions={suggestions}
-              showList={showList}
-              searchingFor={searchingFor === null ? null : searchingFor}
+              assigneeSelected={this.onSelectAssignee}
               inputFocused={() => this.setState({ showList: true })}
+              showList={showList}
+              suggestions={suggestions}
+              searchingFor={searchingFor === '' ? '' : searchingFor}
+              inputVal={textInput}
             />
           </ClickAwayListener>
         )
