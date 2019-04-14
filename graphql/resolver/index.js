@@ -66,7 +66,8 @@ const resolver = {
         hiPri: args.ticketInput.hiPri,
         creator: req.userId,
         label: args.ticketInput.label,
-        createdDate: new Date(args.ticketInput.createdDate)
+        createdDate: new Date(args.ticketInput.createdDate),
+        updatedDate: new Date(args.ticketInput.createdDate)
       });
 
       await new Fawn.Task()
@@ -127,7 +128,10 @@ const resolver = {
 
       await new Fawn.Task()
         .update('tickets', { _id: ticketData._id }, {
-          $set: { assignee: userData._id }
+          $set: { 
+            assignee: userData._id,
+            updatedDate: new Date()
+           }
         })
         .update('users', { _id: userData._id }, {
           $push: { assignedTickets: ticketData._id }
@@ -137,6 +141,7 @@ const resolver = {
       return {
         ...ticketData._doc,
         assignee: queryUser.bind(this, userData._id),
+        updatedDate: new Date()
       }
 
     } catch (err) {
