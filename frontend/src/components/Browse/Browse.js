@@ -199,7 +199,7 @@ export class Browse extends Component {
   }
 
   render() {
-    const { classes, assigning, assigningData, selectedTicket, loading } = this.props;
+    const { classes, assigning, selectedTicket, loading } = this.props;
     const {
       assigneeFieldObj,
       suggestions,
@@ -227,14 +227,13 @@ export class Browse extends Component {
         description,
         hiPri,
         createdDate,
+        updatedDate,
         creator,
         assignee } = selectedTicket;
 
       let assigneeField = null;
       if (assignee !== null) {
         assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
-      } else if (assigningData) {
-        assigneeField = <p><b>Assignee:</b> {' ' + assigningData.assignee.email}</p>;
       } else {
         assigneeField = (
           <ClickAwayListener onClickAway={this.handleClickAway}>
@@ -314,7 +313,7 @@ export class Browse extends Component {
                   <p style={{ marginBottom: 0 }}><b>Reporter:</b> {creator.email}</p>
                   {assigneeField}
                   <p><b>Created At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
-                  <p><b>Updated At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
+                  <p><b>Updated At:</b> {new Date(+updatedDate).toISOString().slice(0, 10)}</p>
                 </Paper>
               </Grid>
             </Grid>
@@ -334,7 +333,6 @@ const maptStateToProps = state => {
     error: state.ticket.error,
     userId: state.auth.userId,
     assigning: state.ticket.assigning,
-    assigningData: state.ticket.assigningData
   }
 }
 

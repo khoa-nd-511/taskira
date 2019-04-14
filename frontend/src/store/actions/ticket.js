@@ -77,6 +77,7 @@ export const browseTicket = (ticketId) => {
               hiPri
               label
               createdDate
+              updatedDate
               creator {
                 email
               }
@@ -192,6 +193,7 @@ export const assignTicket = ({ userEmail, ticketId, token }) => {
             assignee {
               email
             }
+            updatedDate
           }
         }
       `,

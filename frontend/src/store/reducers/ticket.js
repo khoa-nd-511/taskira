@@ -6,7 +6,6 @@ const initialState = {
   loading: false,
   selectedTicket: null,
   assigning: false,
-  assigningData: null
 };
 
 const root = (state = initialState, action) => {
@@ -56,14 +55,16 @@ const root = (state = initialState, action) => {
       }
 
     case actions.ASSIGN_TICKET_SUCCESS:
-      const updatedSelectedTicket = { ...state.selectedTicket };
-      updatedSelectedTicket.assignee = action.data.assignee;
+      const updatedSelectedTicket = {
+        ...state.selectedTicket,
+        assignee: action.data.assignee,
+        updatedDate: action.data.updatedDate
+      };
 
       return {
         ...state,
         assigning: false,
         error: null,
-        assigningData: action.data,
         selectedTicket: updatedSelectedTicket
       }
 
