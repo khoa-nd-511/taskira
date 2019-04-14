@@ -52,18 +52,6 @@ const queryUser = async userId => {
   }
 };
 
-const queryTickets = async ticketIds => {
-  try {
-
-    const tickets = await Ticket.find({ _id: { $in: ticketIds } });
-
-    return tickets.map(t => mapTicketData(t));
-
-  } catch (error) {
-    throw error
-  }
-};
-
 const resolver = {
   createTicket: async (args, req) => {
     if (!req.isAuth) throw new Error("Unauthenticated");

@@ -57,7 +57,6 @@ const schema = buildSchema(`
   type RootQuery {
     getTickets: [Ticket!]!
     getTicket(ticketId: ID!): Ticket!
-    getUser: User!
     signIn(email: String!, password: String!): AuthData!
     searchUsers(text: String!): [User]!
   }
