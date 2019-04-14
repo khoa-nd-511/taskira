@@ -1,6 +1,5 @@
 import * as actions from './actionTypes';
 
-
 export const startAction = () => {
   return {
     type: actions.START_ACTION
@@ -44,7 +43,7 @@ export const loadTickets = () => {
           dispatch(loadTicketsSuccess(res.data.getTickets))
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => dispatch(loadTicketsFailed(err)))
   }
 }
 
@@ -105,6 +104,7 @@ export const browseTicket = (ticketId) => {
           dispatch(browseTicketSuccess(res.data.getTicket))
         }
       })
+      .catch(err => dispatch(loadTicketsFailed(err)))
   }
 }
 
