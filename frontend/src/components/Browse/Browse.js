@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
+import { withSnackbar } from 'notistack';
 import { Subject, empty } from 'rxjs';
 import {
   debounceTime,
@@ -214,7 +215,7 @@ export class Browse extends Component {
   }
 
   render() {
-    const { classes, assigning, selectedTicket, loading } = this.props;
+    const { classes, assigning, selectedTicket, loading, error } = this.props;
     const {
       assigneeFieldObj,
       suggestions,
@@ -270,6 +271,10 @@ export class Browse extends Component {
             />
           </ClickAwayListener>
         )
+      }
+
+      if (error) {
+        this.props.enqueueSnackbar(error.message, { variant: "warning" })
       }
 
       ticketDetail = (
@@ -363,4 +368,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(maptStateToProps, mapDispatchToProps)(withStyles(styles)(Browse));
+export default connect(maptStateToProps, mapDispatchToProps)(withStyles(styles)(withSnackbar(Browse)));
