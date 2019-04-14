@@ -117,30 +117,37 @@ const resolver = {
 
     try {
 
-      const user = User.findOne({ email: userEmail });
+      const curAssignedUser = User.findOne({ email: userEmail });
       const ticket = Ticket.findById(ticketId);
 
-      const metaData = await Promise.all([user, ticket]);
-      const [userData, ticketData] = metaData;
+      const metaData = await Promise.all([curAssignedUser, ticket]);
+      const [currUserData, ticketData] = metaData;
 
       // Return if ticket is already assigned to this user
-      if (userData._id === ticketData.assignee) throw new Error("Already assigned to this user!")
+      if (ticketData.assignee && ((currUserData._id.toString() === ticketData.assignee.toString()))) {
+        throw new Error("Already assigned to this user!")
+      }
 
       await new Fawn.Task()
         .update('tickets', { _id: ticketData._id }, {
-          $set: { 
-            assignee: userData._id,
+          $set: {
+            assignee: currUserData._id,
             updatedDate: new Date()
-           }
+          }
         })
-        .update('users', { _id: userData._id }, {
-          $push: { assignedTickets: ticketData._id }
+        // update prev user assignedTickets array
+        .update('users', { _id: ticketData.assignee }, {
+          $pull: { assignedTickets: ticketData._id.toString() }
+        })
+        // update curr user assignedTickets array
+        .update('users', { _id: currUserData._id }, {
+          $push: { assignedTickets: ticketData._id.toString() }
         })
         .run()
 
       return {
         ...ticketData._doc,
-        assignee: queryUser.bind(this, userData._id),
+        assignee: queryUser.bind(this, currUserData._id),
         updatedDate: new Date()
       }
 
