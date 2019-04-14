@@ -8,5 +8,6 @@ export {
   loadTickets,
   browseTicket,
   clearCurrentSelectedTicket,
-  createTicket
+  createTicket,
+  assignTicket
 } from './ticket'

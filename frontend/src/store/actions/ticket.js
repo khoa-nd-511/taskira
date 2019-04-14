@@ -7,7 +7,6 @@ export const startAction = () => {
   }
 }
 
-
 export const loadTickets = () => {
   return dispatch => {
     dispatch(startAction())
@@ -23,6 +22,9 @@ export const loadTickets = () => {
             label
             createdDate
             creator {
+              email
+            }
+            assignee {
               email
             }
           }
@@ -77,9 +79,9 @@ export const browseTicket = (ticketId) => {
               createdDate
               creator {
                 email
-                createdTickets {
-                  title
-                }
+              }
+              assignee {
+                email
               }
             },
           }`,
@@ -153,7 +155,6 @@ export const createTicket = ticketInputObj => {
     })
       .then(data => data.json())
       .then(res => {
-        console.log(res)
         if (res.errors) {
           dispatch(createTicketFailed(res.errors[0]));
         } else {
@@ -176,5 +177,62 @@ export const createTicketSuccess = ticket => {
   return {
     type: actions.CREATE_TICKET_SUCCESS,
     ticket
+  }
+}
+
+export const assignTicket = ({ userEmail, ticketId, token }) => {
+  return dispatch => {
+    dispatch(startAssigninTicket());
+
+    const reqBody = {
+      query: `
+        mutation AssignTicket($userEmail: String!, $ticketId: ID!) {
+          assignTicket(userEmail: $userEmail, ticketId: $ticketId) {
+            title
+            assignee {
+              email
+            }
+          }
+        }
+      `,
+      variables: {
+        userEmail,
+        ticketId
+      }
+    }
+
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(reqBody)
+    })
+      .then(res => res.json())
+      .then((res) => {
+        if (res.errors) {
+          dispatch(assignTicketFailed(res.errors[0]))
+        } else {
+          dispatch(assignTicketSuccess(res.data.assignTicket))
+        }
+      }).catch(error => assignTicketFailed(error))
+  }
+}
+
+export const startAssigninTicket = () => {
+  return {
+    type: actions.START_ASSIGNING_TICKET
+  }
+}
+
+export const assignTicketFailed = error => {
+  return {
+    type: actions.ASSIGN_TICKET_FAILED,
+    error
+  }
+}
+
+export const assignTicketSuccess = data => {
+  return {
+    type: actions.ASSIGN_TICKET_SUCCESS,
+    data
   }
 }

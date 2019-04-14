@@ -9,10 +9,14 @@ import {
   List,
   ListItemText,
   ListSubheader,
+  Button
 } from '@material-ui/core';
+import {
+  CheckCircleOutlineTwoTone,
+} from '@material-ui/icons';
 
 const styles = theme => {
-  const { transitions, shadows } = theme;
+  const { transitions, shadows, spacing, palette } = theme;
   return {
     positionRelative: {
       position: 'relative'
@@ -32,7 +36,7 @@ const styles = theme => {
     },
     suggestionItem: {
       transition: `all ${transitions.duration.shorter}ms ${transitions.easing.easeOut}`,
-      padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+      padding: `${spacing.unit}px ${spacing.unit * 2}px`,
       '&:hover': {
         background: '#f7f7f7',
         fontWeight: 'bold'
@@ -41,8 +45,14 @@ const styles = theme => {
     list: {
       width: '100%',
       maxWidth: 360,
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: palette.background.paper,
     },
+    action: {
+      position: 'absolute',
+      top: '50%',
+      right: spacing.unit,
+      transform: 'translateY(-50%)'
+    }
   }
 }
 
@@ -50,13 +60,15 @@ const autocomplete = props => {
 
   const {
     classes,
-    inputChanged,
     suggestions,
     showList,
+    showActions,
     searchingFor,
+    inputVal,
+    inputChanged,
     inputFocused,
     assigneeSelected,
-    inputVal } = props;
+    assign } = props;
   const { placeholder, type } = props.data;
 
   return (
@@ -102,7 +114,17 @@ const autocomplete = props => {
         </List>
       )}
 
-      {searchingFor !== '' ? <p style={{ textAlign: 'right' }}>Searching for {searchingFor}...</p> : null}
+      {searchingFor !== '' && (
+        <p style={{ textAlign: 'right' }}>
+          Searching for {searchingFor}...
+        </p>
+      )}
+
+      {showActions && (
+        <Button className={classes.action} onClick={assign}>
+          <CheckCircleOutlineTwoTone />
+        </Button>
+      )}
     </FormControl>
   )
 }

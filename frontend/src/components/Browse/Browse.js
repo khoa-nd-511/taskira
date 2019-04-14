@@ -77,6 +77,29 @@ const styles = theme => ({
   assigneeField: {
     display: 'flex',
     alignItems: 'baseline'
+  },
+  cover: {
+    position: 'relative',
+    zIndex: 1,
+
+    '&:before': {
+      content: "''",
+      position: 'absolute',
+      top: 0, bottom: 0, left: 0, right: 0,
+      zIndex: 2,
+      animation: '1s pulsing ease infinite'
+    }
+  },
+  '@keyframes pulsing': {
+    '0%': {
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    },
+    '50%': {
+      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    '100%': {
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    },
   }
 })
 
@@ -93,6 +116,7 @@ export class Browse extends Component {
     },
     suggestions: [],
     showList: false,
+    showActions: false,
     searchingFor: '',
     textInput: '',
   };
@@ -101,6 +125,20 @@ export class Browse extends Component {
     this.inputSubject.next(e);
   }
 
+  onSelectAssignee = email => {
+    this.setState({ showList: false, textInput: email, showActions: true })
+  }
+
+  onAssign = () => {
+    const token = localStorage.getItem('token');
+    const dataObj = {
+      userEmail: this.state.textInput,
+      ticketId: this.props.selectedTicket._id,
+      token
+    }
+
+    this.props.onAssignTicket(dataObj)
+  }
 
   handleClickAway = e => {
     this.setState({ showList: false })
@@ -132,18 +170,19 @@ export class Browse extends Component {
     }).then(data => data.json())
   }
 
-  onSelectAssignee = email => {
-    this.setState({ showList: false, textInput: email })
-  }
-
   componentDidMount = () => {
+    const isLoggedIn = localStorage.getItem('userId') !== null;
+    if (!isLoggedIn) {
+      this.props.history.push('/login');
+    }
+
     const currentTicketId = JSON.parse(localStorage.getItem('selectedTicket'))
     if (currentTicketId !== null) {
       this.props.onBrowseTicket(currentTicketId);
     }
 
     this.inputSource$ = this.inputSubject.pipe(
-      tap(val => this.setState({ suggestions: [], showList: false, searchingFor: val, textInput: val })),
+      tap(val => this.setState({ suggestions: [], showList: false, searchingFor: val, textInput: val, showActions: false })),
       debounceTime(250),
       switchMap(txt => txt !== '' ? this.fetchUsersByEmail(txt) : this.resetState()),
     );
@@ -160,23 +199,28 @@ export class Browse extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, assigning, assigningData, selectedTicket, loading } = this.props;
     const {
       assigneeFieldObj,
       suggestions,
       showList,
       searchingFor,
-      textInput } = this.state;
+      textInput,
+      showActions, } = this.state;
+    let dynamicClasses = [classes.paper];
+
+    if (assigning) {
+      dynamicClasses.push(classes.cover);
+    } else dynamicClasses = [classes.paper];
 
     let ticketDetail = null;
 
-    if (this.props.loading) {
+    if (loading && !selectedTicket) {
       ticketDetail = <Spinner />
-    } else if (!this.props.selectedTicket || this.props.error) {
+    } else if (!selectedTicket) {
       ticketDetail = 'Browse ticket failed ...'
     } else {
-      localStorage.setItem('selectedTicket', JSON.stringify(this.props.selectedTicket._id));
-
+      localStorage.setItem('selectedTicket', JSON.stringify(selectedTicket._id));
       const {
         title,
         label,
@@ -184,14 +228,19 @@ export class Browse extends Component {
         hiPri,
         createdDate,
         creator,
-        assignee } = this.props.selectedTicket;
+        assignee } = selectedTicket;
 
       let assigneeField = null;
-      if (!assignee) {
+      if (assignee !== null) {
+        assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
+      } else if (assigningData) {
+        assigneeField = <p><b>Assignee:</b> {' ' + assigningData.assignee.email}</p>;
+      } else {
         assigneeField = (
           <ClickAwayListener onClickAway={this.handleClickAway}>
             <Autocomplete
               data={assigneeFieldObj}
+              assign={this.onAssign}
               inputChanged={this.onHandleInputChanged}
               assigneeSelected={this.onSelectAssignee}
               inputFocused={() => this.setState({ showList: true })}
@@ -199,11 +248,10 @@ export class Browse extends Component {
               suggestions={suggestions}
               searchingFor={searchingFor === '' ? '' : searchingFor}
               inputVal={textInput}
+              showActions={showActions}
             />
           </ClickAwayListener>
         )
-      } else {
-        assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
       }
 
       ticketDetail = (
@@ -262,7 +310,7 @@ export class Browse extends Component {
           <Grid item xs={12} lg={4} className={classes.item3}>
             <Grid container>
               <Grid item xs={12}>
-                <Paper className={classes.paper}>
+                <Paper className={dynamicClasses.join(' ')}>
                   <p style={{ marginBottom: 0 }}><b>Reporter:</b> {creator.email}</p>
                   {assigneeField}
                   <p><b>Created At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
@@ -283,14 +331,18 @@ const maptStateToProps = state => {
   return {
     selectedTicket: state.ticket.selectedTicket,
     loading: state.ticket.loading,
-    error: state.ticket.error
+    error: state.ticket.error,
+    userId: state.auth.userId,
+    assigning: state.ticket.assigning,
+    assigningData: state.ticket.assigningData
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     onBrowseTicket: id => dispatch(actions.browseTicket(id)),
-    onClearCurrentSelectedTicket: () => dispatch(actions.clearCurrentSelectedTicket())
+    onClearCurrentSelectedTicket: () => dispatch(actions.clearCurrentSelectedTicket()),
+    onAssignTicket: dataObj => dispatch(actions.assignTicket(dataObj))
   }
 }
 

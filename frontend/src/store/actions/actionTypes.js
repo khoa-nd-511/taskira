@@ -22,5 +22,6 @@ export const CREATE_TICKET_SUCCESS          = 'CREATE_TICKET_SUCCESS'
 export const CREATE_TICKET_FAILED           = 'CREATE_TICKET_FAILED'
 
 export const ASSIGN_TICKET                  = 'ASSIGN_TICKET'
+export const START_ASSIGNING_TICKET         = 'START_ASSIGNING_TICKET'
 export const ASSIGN_TICKET_SUCCESS          = 'ASSIGN_TICKET_SUCCESS'
 export const ASSIGN_TICKET_FAILED           = 'ASSIGN_TICKET_FAILED'

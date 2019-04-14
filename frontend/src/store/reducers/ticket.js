@@ -4,7 +4,9 @@ const initialState = {
   tickets: [],
   error: null,
   loading: false,
-  selectedTicket: null
+  selectedTicket: null,
+  assigning: false,
+  assigningData: null
 };
 
 const root = (state = initialState, action) => {
@@ -13,6 +15,13 @@ const root = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
+        error: null
+      }
+
+    case actions.START_ASSIGNING_TICKET:
+      return {
+        ...state,
+        assigning: true,
         error: null
       }
 
@@ -46,10 +55,30 @@ const root = (state = initialState, action) => {
         error: action.error
       }
 
+    case actions.ASSIGN_TICKET_SUCCESS:
+      const updatedSelectedTicket = { ...state.selectedTicket };
+      updatedSelectedTicket.assignee = action.data.assignee;
+
+      return {
+        ...state,
+        assigning: false,
+        error: null,
+        assigningData: action.data,
+        selectedTicket: updatedSelectedTicket
+      }
+
+    case actions.ASSIGN_TICKET_FAILED:
+      return {
+        ...state,
+        assigning: false,
+        error: action.error
+      }
+
     case actions.CLEAR_CURRENT_SELECTED_TICKET:
       return {
         ...state,
-        selectedTicket: null
+        selectedTicket: null,
+        assigningData: null
       }
 
     case actions.CREATE_TICKET_SUCCESS:
