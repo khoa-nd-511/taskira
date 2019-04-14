@@ -25,6 +25,7 @@ app.use((req, res, next) => {
   next();
 })
 
+
 app.use(isAuth);
 
 app.use('/graphql', graphqlHTTP({
@@ -35,17 +36,6 @@ app.use('/graphql', graphqlHTTP({
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await mongoose.connect(`mongodb://taskira_db:dangkhoa95@ds139896.mlab.com:39896/taskira`, {
-      useNewUrlParser: true
-    });
-  } catch (error) {
-    console.log(error)
-  }
-  app.listen(PORT, () => {
-    console.log(`Server started on port: ${PORT}`)
-  });
-}
-
-startServer();
+mongoose.connect(`mongodb+srv://khoa_admin:${process.env.MONGO_PWD}@khoadev-qgt4c.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`, {
+  useNewUrlParser: true
+}).then(() => app.listen(PORT)).catch(err => console.log(err))
