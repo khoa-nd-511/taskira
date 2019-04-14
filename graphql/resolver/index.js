@@ -6,7 +6,7 @@ const DataLoader = require('dataloader');
 Fawn.init(mongoose);
 
 const ticketLoader = new DataLoader((ticketIds) => {
-  return queryTickets(ticketIds);
+  return Ticket.find({ _id: { $in: ticketIds } })
 });
 
 const userLoader = new DataLoader((userIds) => {
@@ -22,11 +22,14 @@ const mapTicketData = (ticketData) => {
   mappedTicketData = {
     ...ticketData._doc,
     _id: ticketData._id,
-    creator: queryUser.bind(this, ticketData.creator.toString()),
+    creator: queryUser.bind(this, ticketData._doc.creator.toString()),
   };
 
-  if (mappedTicketData.assignee !== undefined) {
-    mappedTicketData['assignee'] = queryUser.bind(this, ticketData.assignee.toString());
+  if (mappedTicketData.assignee) {
+    return {
+      ...mappedTicketData,
+      assignee: queryUser.bind(this, ticketData._doc.assignee.toString())
+    }
   };
 
   return mappedTicketData;
@@ -99,7 +102,9 @@ const resolver = {
   getTicket: async ({ ticketId }) => {
     try {
 
-      return await ticketLoader.load(ticketId);
+      const ticket = await Ticket.findOne({ _id: ticketId });
+
+      return mapTicketData(ticket);
 
     } catch (err) {
       throw err;
@@ -117,18 +122,21 @@ const resolver = {
       const metaData = await Promise.all([user, ticket]);
       const [userData, ticketData] = metaData;
 
+      // Return if ticket is already assigned to this user
+      if (userData._id === ticketData.assignee) throw new Error("Already assigned to this user!")
+
       await new Fawn.Task()
         .update('tickets', { _id: ticketData._id }, {
-          $push: { assignee: userData._id }
+          $set: { assignee: userData._id }
         })
         .update('users', { _id: userData._id }, {
           $push: { assignedTickets: ticketData._id }
         })
+        .run()
 
       return {
-        ...ticket._doc,
-        assignee: queryUser.bind(this, user._id),
-        creator: queryUser.bind(this, ticket.creator)
+        ...ticketData._doc,
+        assignee: queryUser.bind(this, userData._id),
       }
 
     } catch (err) {
