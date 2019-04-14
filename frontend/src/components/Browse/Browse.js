@@ -100,6 +100,12 @@ const styles = theme => ({
     '100%': {
       backgroundColor: 'rgba(255, 255, 255, 0.8)',
     },
+  },
+  hoverable: {
+    '&:hover': {
+      cursor: 'pointer',
+      backgroundColor: '#eee'
+    }
   }
 })
 
@@ -117,6 +123,7 @@ export class Browse extends Component {
     suggestions: [],
     showList: false,
     showActions: false,
+    reAssign: false,
     searchingFor: '',
     textInput: '',
   };
@@ -137,7 +144,8 @@ export class Browse extends Component {
       token
     }
 
-    this.props.onAssignTicket(dataObj)
+    this.props.onAssignTicket(dataObj);
+    this.setState({ reAssign: false });
   }
 
   handleClickAway = e => {
@@ -168,6 +176,13 @@ export class Browse extends Component {
       body: JSON.stringify(reqBody),
       headers: { 'Content-Type': 'application/json' }
     }).then(data => data.json())
+  }
+
+  switchToAutoComplete = email => {
+    this.setState({
+      reAssign: true,
+      textInput: email
+    })
   }
 
   componentDidMount = () => {
@@ -206,7 +221,9 @@ export class Browse extends Component {
       showList,
       searchingFor,
       textInput,
-      showActions, } = this.state;
+      showActions,
+      reAssign,
+    } = this.state;
     let dynamicClasses = [classes.paper];
 
     if (assigning) {
@@ -232,8 +249,8 @@ export class Browse extends Component {
         assignee } = selectedTicket;
 
       let assigneeField = null;
-      if (assignee !== null) {
-        assigneeField = <p><b>Assignee:</b> {' ' + assignee.email}</p>;
+      if (assignee !== null && !reAssign) {
+        assigneeField = <p><b>Assignee:</b> <span className={classes.hoverable} onClick={() => this.switchToAutoComplete(assignee.email)}>{' ' + assignee.email}</span></p>;
       } else {
         assigneeField = (
           <ClickAwayListener onClickAway={this.handleClickAway}>
@@ -243,11 +260,13 @@ export class Browse extends Component {
               inputChanged={this.onHandleInputChanged}
               assigneeSelected={this.onSelectAssignee}
               inputFocused={() => this.setState({ showList: true })}
+              cancelReassign={() => this.setState({ reAssign: false })}
               showList={showList}
               suggestions={suggestions}
               searchingFor={searchingFor === '' ? '' : searchingFor}
               inputVal={textInput}
               showActions={showActions}
+              reAssign={reAssign}
             />
           </ClickAwayListener>
         )
@@ -312,8 +331,8 @@ export class Browse extends Component {
                 <Paper className={dynamicClasses.join(' ')}>
                   <p style={{ marginBottom: 0 }}><b>Reporter:</b> {creator.email}</p>
                   {assigneeField}
-                  <p><b>Created At:</b> {new Date(+createdDate).toISOString().slice(0, 10)}</p>
-                  <p><b>Updated At:</b> {new Date(+updatedDate).toISOString().slice(0, 10)}</p>
+                  <p><b>Created At:</b> {new Date(+createdDate).toLocaleString()}</p>
+                  <p><b>Updated At:</b> {new Date(+updatedDate).toLocaleString()}</p>
                 </Paper>
               </Grid>
             </Grid>

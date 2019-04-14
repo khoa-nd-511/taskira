@@ -13,6 +13,7 @@ import {
 } from '@material-ui/core';
 import {
   CheckCircleOutlineTwoTone,
+  CancelOutlined
 } from '@material-ui/icons';
 
 const styles = theme => {
@@ -47,7 +48,7 @@ const styles = theme => {
       maxWidth: 360,
       backgroundColor: palette.background.paper,
     },
-    action: {
+    actions: {
       position: 'absolute',
       top: '50%',
       right: spacing.unit,
@@ -68,8 +69,45 @@ const autocomplete = props => {
     inputChanged,
     inputFocused,
     assigneeSelected,
-    assign } = props;
+    assign,
+    reAssign,
+    cancelReassign
+  } = props;
   const { placeholder, type } = props.data;
+
+  let actions = null;
+  if (showActions) {
+    actions = (
+      <div className={classes.actions}>
+        <Button onClick={assign}>
+          <CheckCircleOutlineTwoTone />
+        </Button>
+      </div>
+    )
+  }
+  
+  if (reAssign && searchingFor === '') {
+    actions = (
+      <div className={classes.actions}>
+        <Button onClick={cancelReassign}>
+          <CancelOutlined />
+        </Button>
+      </div>
+    )
+  }
+
+  if (showActions && reAssign) {
+    actions = (
+      <div className={classes.actions}>
+        <Button onClick={assign}>
+          <CheckCircleOutlineTwoTone />
+        </Button>
+        <Button onClick={cancelReassign}>
+          <CancelOutlined />
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <FormControl
@@ -120,11 +158,8 @@ const autocomplete = props => {
         </p>
       )}
 
-      {showActions && (
-        <Button className={classes.action} onClick={assign}>
-          <CheckCircleOutlineTwoTone />
-        </Button>
-      )}
+      {actions}
+
     </FormControl>
   )
 }
