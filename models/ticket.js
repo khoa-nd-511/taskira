@@ -19,6 +19,11 @@ const ticketSchema = new Schema({
     type: String,
     required: true
   },
+  status: {
+    type: String,
+    enum: ['ready, inprogress', 'review', 'deploy', 'invalid'],
+    required: true
+  },
   createdDate: {
     type: Date,
     required: true

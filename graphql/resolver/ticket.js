@@ -14,6 +14,7 @@ module.exports = {
         hiPri: args.ticketInput.hiPri,
         creator: req.userId,
         label: args.ticketInput.label,
+        status: 'ready',
         createdDate: new Date(args.ticketInput.createdDate),
         updatedDate: new Date(args.ticketInput.createdDate)
       });

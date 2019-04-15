@@ -7,6 +7,7 @@ const schema = buildSchema(`
     description: String!
     hiPri: Boolean!
     label: String!
+    status: String!
     creator: User!
     assignee: User
     createdDate: String!
