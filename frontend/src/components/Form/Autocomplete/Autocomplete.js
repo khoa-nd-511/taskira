@@ -53,6 +53,11 @@ const styles = theme => {
       top: '50%',
       right: spacing.unit,
       transform: 'translateY(-50%)'
+    },
+    button: {
+      [theme.breakpoints.up('lg')]: {
+        minWidth: 'unset',
+      }
     }
   }
 }
@@ -79,7 +84,7 @@ const autocomplete = props => {
   if (showActions) {
     actions = (
       <div className={classes.actions}>
-        <Button onClick={assign}>
+        <Button onClick={assign} className={classes.button}>
           <CheckCircleOutlineTwoTone />
         </Button>
       </div>
@@ -89,7 +94,7 @@ const autocomplete = props => {
   if (reAssign && searchingFor === '') {
     actions = (
       <div className={classes.actions}>
-        <Button onClick={cancelReassign}>
+        <Button onClick={cancelReassign} className={classes.button}>
           <CancelOutlined />
         </Button>
       </div>
@@ -99,10 +104,10 @@ const autocomplete = props => {
   if (showActions && reAssign) {
     actions = (
       <div className={classes.actions}>
-        <Button onClick={assign}>
+        <Button onClick={assign} className={classes.button}>
           <CheckCircleOutlineTwoTone />
         </Button>
-        <Button onClick={cancelReassign}>
+        <Button onClick={cancelReassign} className={classes.button}>
           <CancelOutlined />
         </Button>
       </div>
@@ -153,7 +158,7 @@ const autocomplete = props => {
       )}
 
       {searchingFor !== '' && (
-        <p style={{ textAlign: 'right' }}>
+        <p style={{ textAlign: 'right', fontSize: '12px' }}>
           Searching for {searchingFor}...
         </p>
       )}
