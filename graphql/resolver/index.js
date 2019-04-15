@@ -46,7 +46,7 @@ const mapUserData = (userData) => {
 const queryUser = async userId => {
   try {
 
-    const user = await userLoader.load(userId.toString());
+    const user = await User.findById(userId);
 
     return mapUserData(user);
 
