@@ -88,6 +88,25 @@ const root = (state = initialState, action) => {
         tickets: []
       }
 
+    case actions.UPDATE_TICKET_STATUS_SUCCESS:
+      const updatedTicket = {
+        ...state.selectedTicket,
+        status: action.data.status,
+        updatedDate: action.data.updatedDate
+      }
+      return {
+        ...state,
+        loading: false,
+        selectedTicket: updatedTicket
+      }
+
+    case actions.UPDATE_TICKET_STATUS_FAILED:
+      return {
+        ...state,
+        loading: false,
+        error: action.error
+      }
+
     default:
       return state;
   }

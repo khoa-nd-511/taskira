@@ -239,3 +239,56 @@ export const assignTicketSuccess = data => {
     data
   }
 }
+
+export const updateTicketStatus = (ticketId, status) => {
+  return dispatch => {
+    dispatch(startAction());
+
+    try {
+      const reqBody = {
+        query: `
+          mutation UpdateStatus($ticketId: ID, $status: String){
+            updateStatus(ticketId: $ticketId, status: $status) {
+              status
+              updatedDate
+            }
+          }
+        `,
+        variables: {
+          ticketId,
+          status
+        }
+      };
+      fetch('http://localhost:5000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqBody)
+      })
+        .then(data => data.json())
+        .then(res => {
+          if (res.errors) {
+            dispatch(updateTicketStatusFailed(res.errors[0]))
+          } else {
+            dispatch(updateTicketStatusSuccess(res.data.updateStatus))
+          }
+        })
+        .catch(err => console.log(err))
+    } catch (error) {
+      dispatch(updateTicketStatusFailed(error))
+    }
+  }
+}
+
+export const updateTicketStatusSuccess = data => {
+  return {
+    type: actions.UPDATE_TICKET_STATUS_SUCCESS,
+    data
+  }
+}
+
+export const updateTicketStatusFailed = error => {
+  return {
+    type: actions.UPDATE_TICKET_STATUS_FAILED,
+    error
+  }
+}

@@ -106,7 +106,7 @@ export class Browse extends Component {
   }
 
   updateStatusHandler = status => {
-    console.log(status)
+    this.props.onUpdateTicketStatus(this.props.selectedTicket._id, status);
   }
 
   componentDidMount = () => {
@@ -291,7 +291,8 @@ const mapDispatchToProps = dispatch => {
   return {
     onBrowseTicket: id => dispatch(actions.browseTicket(id)),
     onClearCurrentSelectedTicket: () => dispatch(actions.clearCurrentSelectedTicket()),
-    onAssignTicket: dataObj => dispatch(actions.assignTicket(dataObj))
+    onAssignTicket: dataObj => dispatch(actions.assignTicket(dataObj)),
+    onUpdateTicketStatus: (id, status) => dispatch(actions.updateTicketStatus(id, status))
   }
 }
 

@@ -8,6 +8,8 @@ export const displayStatus = status => {
       return 'Needs Review'
     case 'deploy':
       return 'Ready To Deploy'
+    case 'resolved':
+      return 'Resolved'
     case 'invalid':
       return 'Invalid Ticket'
     default:
