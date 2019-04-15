@@ -12,20 +12,27 @@ const ticketLoader = new DataLoader(ticketIds => {
   return queryTickets(ticketIds)
 });
 
-const userLoader = new DataLoader((userIds) => {
-  return User.find({ _id: { $in: userIds } })
+const userLoader = new DataLoader(async userIds => {
+  const batchedUserData = await User.find({ _id: { $in: userIds } });
+
+  const sortedData = {};
+  batchedUserData.forEach(u => {
+    sortedData[u._id] = u;
+  });
+
+  return userIds.map(id => sortedData[id]);
 })
 
 const queryTickets = async ticketIds => {
   const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
-  return tickets.map(t => mapTicketData(t))
+  return ticketIds.map(id => mapTicketData(tickets[id]))
 }
 
 const queryUser = async userId => {
   try {
 
-    const user = await User.findById(userId);
+    const user = await userLoader.load(userId);
 
     return mapUserData(user);
 
@@ -39,8 +46,8 @@ const mapTicketData = (ticketData) => {
     return {
       ...ticketData._doc,
       _id: ticketData._id,
-      creator: userLoader.load(ticketData._doc.creator.toString()),
-      assignee: userLoader.load(ticketData._doc.assignee.toString())
+      creator: queryUser.bind(this, ticketData._doc.creator.toString()),
+      assignee: queryUser.bind(this, ticketData._doc.assignee.toString())
     }
   };
 
