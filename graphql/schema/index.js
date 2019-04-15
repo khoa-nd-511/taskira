@@ -39,6 +39,11 @@ const schema = buildSchema(`
     token: String!
   }
 
+  type UpdateStatusData {
+    status: String!
+    updatedDate: String!
+  }
+
   input TicketInput {
     title: String!
     description: String!
@@ -66,7 +71,7 @@ const schema = buildSchema(`
     createTicket(ticketInput: TicketInput): Ticket
     createUser(userInput: UserInput): User
     assignTicket(userEmail: String, ticketId: ID): Ticket
-    updateStatus(ticketId: ID, status: String): String
+    updateStatus(ticketId: ID, status: String): UpdateStatusData
   }
 
   schema {

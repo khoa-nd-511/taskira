@@ -84,13 +84,13 @@ module.exports = {
       }
 
       await Ticket.findOneAndUpdate({ _id: ticketId }, {
-        $set: { 
+        $set: {
           status: newStatus,
           updatedDate: new Date()
-         }
+        }
       });
 
-      return newStatus;
+      return { status: newStatus, updatedDate: new Date() };
     } catch (error) {
       throw error;
     }
