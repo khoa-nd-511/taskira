@@ -3,44 +3,23 @@ const mongoose = require('mongoose');
 const Fawn = require('fawn');
 const DataLoader = require('dataloader');
 
+const Ticket = require('../../models/ticket');
+const User = require('../../models/user');
+
 Fawn.init(mongoose);
 
-const ticketLoader = new DataLoader((ticketIds) => {
-  return Ticket.find({ _id: { $in: ticketIds } })
+const ticketLoader = new DataLoader(ticketIds => {
+  return queryTickets(ticketIds)
 });
 
 const userLoader = new DataLoader((userIds) => {
   return User.find({ _id: { $in: userIds } })
 })
 
-const Ticket = require('../../models/ticket');
-const User = require('../../models/user');
+const queryTickets = async ticketIds => {
+  const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
-const mapTicketData = (ticketData) => {
-  let mappedTicketData = null;
-
-  mappedTicketData = {
-    ...ticketData._doc,
-    _id: ticketData._id,
-    creator: queryUser.bind(this, ticketData._doc.creator.toString()),
-  };
-
-  if (mappedTicketData.assignee) {
-    return {
-      ...mappedTicketData,
-      assignee: queryUser.bind(this, ticketData._doc.assignee.toString())
-    }
-  };
-
-  return mappedTicketData;
-};
-
-const mapUserData = (userData) => {
-  return {
-    ...userData._doc,
-    createdTickets: () => ticketLoader.loadMany(userData.createdTickets),
-    assignedTickets: () => ticketLoader.loadMany(userData.assignedTickets)
-  };
+  return tickets.map(t => mapTicketData(t))
 }
 
 const queryUser = async userId => {
@@ -54,6 +33,32 @@ const queryUser = async userId => {
     throw err;
   }
 };
+
+const mapTicketData = (ticketData) => {
+  if (ticketData.assignee) {
+    return {
+      ...ticketData._doc,
+      _id: ticketData._id,
+      creator: userLoader.load(ticketData._doc.creator.toString()),
+      assignee: userLoader.load(ticketData._doc.assignee.toString())
+    }
+  };
+
+  return {
+    ...ticketData._doc,
+    _id: ticketData._id,
+    creator: queryUser.bind(this, ticketData._doc.creator.toString()),
+  };
+};
+
+const mapUserData = (userData) => {
+  return {
+    ...userData._doc,
+    _id: userData._doc._id,
+    createdTickets: () => ticketLoader.loadMany(userData.createdTickets),
+    assignedTickets: () => ticketLoader.loadMany(userData.assignedTickets)
+  };
+}
 
 const resolver = {
   createTicket: async (args, req) => {
@@ -79,14 +84,13 @@ const resolver = {
 
       return {
         ...ticket._doc,
-        creator: queryUser(ticket.creator)
+        creator: queryUser.bind(this, ticket.creator.toString())
       };
 
     } catch (err) {
       throw err;
     }
   },
-
 
   getTickets: async () => {
     try {
@@ -137,17 +141,17 @@ const resolver = {
         })
         // update prev user assignedTickets array
         .update('users', { _id: ticketData.assignee }, {
-          $pull: { assignedTickets: ticketData._id.toString() }
+          $pull: { assignedTickets: ticketData._id }
         })
         // update curr user assignedTickets array
         .update('users', { _id: currUserData._id }, {
-          $push: { assignedTickets: ticketData._id.toString() }
+          $push: { assignedTickets: ticketData._id }
         })
         .run()
 
       return {
         ...ticketData._doc,
-        assignee: queryUser.bind(this, currUserData._id),
+        assignee: queryUser.bind(this, currUserData._id.toString()),
         updatedDate: new Date()
       }
 
