@@ -24,91 +24,10 @@ import {
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
-import * as actions from '../../store/actions';
-import Spinner from '../UI/Spinner/Spinner';
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
-
-const styles = theme => ({
-  root: {
-    ...theme.typography.body1
-  },
-  header: {
-    ...theme.typography.h4,
-    paddingLeft: theme.spacing.unit * 2,
-    paddingRight: theme.spacing.unit * 2,
-    boxShadow: theme.shadows[0],
-  },
-  paper: {
-    padding: theme.spacing.unit * 2,
-    marginBottom: theme.spacing.unit * 2
-  },
-  button: {
-    fontSize: '10px',
-    padding: theme.spacing.unit,
-    marginLeft: theme.spacing.unit * 2
-  },
-  customChip: {
-    fontSize: '12px',
-    marginLeft: '20px'
-  },
-  prio: {
-    ...theme.typography.subtitle2,
-    marginLeft: theme.spacing.unit * (6 / 8),
-    fontWeight: 'bold'
-  },
-  div: {
-    marginBottom: theme.spacing.unit * 1.5
-  },
-  item2: {
-    order: 3,
-    [theme.breakpoints.up('lg')]: {
-      order: 2,
-    },
-  },
-  item3: {
-    order: 2,
-    [theme.breakpoints.up('lg')]: {
-      order: 3,
-    },
-  },
-  centeringChildren: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  assigneeField: {
-    display: 'flex',
-    alignItems: 'baseline'
-  },
-  cover: {
-    position: 'relative',
-    zIndex: 1,
-
-    '&:before': {
-      content: "''",
-      position: 'absolute',
-      top: 0, bottom: 0, left: 0, right: 0,
-      zIndex: 2,
-      animation: '1s pulsing ease infinite'
-    }
-  },
-  '@keyframes pulsing': {
-    '0%': {
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    },
-    '50%': {
-      backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    },
-    '100%': {
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    },
-  },
-  hoverable: {
-    '&:hover': {
-      cursor: 'pointer',
-      backgroundColor: '#eee'
-    }
-  }
-})
+import Spinner from '../UI/Spinner/Spinner';
+import * as actions from '../../store/actions';
+import { displayStatus, styles } from './helper';
 
 export class Browse extends Component {
   inputSubject = new Subject();
@@ -186,6 +105,10 @@ export class Browse extends Component {
     })
   }
 
+  updateStatusHandler = status => {
+    console.log(status)
+  }
+
   componentDidMount = () => {
     const isLoggedIn = localStorage.getItem('userId') !== null;
     if (!isLoggedIn) {
@@ -229,7 +152,9 @@ export class Browse extends Component {
 
     if (assigning) {
       dynamicClasses.push(classes.cover);
-    } else dynamicClasses = [classes.paper];
+    } else {
+      dynamicClasses = [classes.paper];
+    };
 
     let ticketDetail = null;
 
@@ -247,7 +172,9 @@ export class Browse extends Component {
         createdDate,
         updatedDate,
         creator,
-        assignee } = selectedTicket;
+        assignee,
+        status
+      } = selectedTicket;
 
       let assigneeField = null;
       if (assignee !== null && !reAssign) {
@@ -292,7 +219,7 @@ export class Browse extends Component {
                 <Paper className={classes.paper}>
                   <div className={classes.div}>
                     <b>Status:</b>
-                    <Button color="primary" variant="contained" className={classes.button}>Ready To Start</Button>
+                    <Button color="primary" variant="contained" className={classes.button} onClick={() => this.updateStatusHandler(status)}>{displayStatus(status)}</Button>
                   </div>
 
 

@@ -77,6 +77,7 @@ export const browseTicket = (ticketId) => {
               label
               createdDate
               updatedDate
+              status
               creator {
                 email
               }
