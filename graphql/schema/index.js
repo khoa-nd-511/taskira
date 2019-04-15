@@ -66,6 +66,7 @@ const schema = buildSchema(`
     createTicket(ticketInput: TicketInput): Ticket
     createUser(userInput: UserInput): User
     assignTicket(userEmail: String, ticketId: ID): Ticket
+    updateStatus(ticketId: ID, status: String): String
   }
 
   schema {

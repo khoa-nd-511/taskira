@@ -57,4 +57,42 @@ module.exports = {
       throw err;
     }
   },
+
+  updateStatus: async ({ ticketId, status }) => {
+    try {
+      let newStatus = '';
+
+      switch (status) {
+        case 'ready':
+          newStatus = 'inprogress'
+          break;
+        case 'inprogress':
+          newStatus = 'review'
+          break;
+        case 'review':
+          newStatus = 'deploy'
+          break;
+        case 'deploy':
+          newStatus = 'resolved'
+          break;
+        case 'invalid':
+          newStatus = 'invalid'
+          break;
+        default:
+          newStatus = 'ready'
+          break;
+      }
+
+      await Ticket.findOneAndUpdate({ _id: ticketId }, {
+        $set: { 
+          status: newStatus,
+          updatedDate: new Date()
+         }
+      });
+
+      return newStatus;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
