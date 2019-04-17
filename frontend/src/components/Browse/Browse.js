@@ -32,6 +32,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
 import Spinner from '../UI/Spinner/Spinner';
 import * as actions from '../../store/actions';
+import RightSection from './RightSection/RightSection';
+
 import { displayStatus, statusList, getStatus, styles } from './helper';
 
 export class Browse extends Component {
@@ -98,7 +100,7 @@ export class Browse extends Component {
       }
     }
 
-    return fetch('http://localhost:1000/graphql', {
+    return fetch('http://localhost:5000/graphql', {
       method: 'POST',
       body: JSON.stringify(reqBody),
       headers: { 'Content-Type': 'application/json' }
@@ -314,20 +316,16 @@ export class Browse extends Component {
             </Grid>
           </Grid>
 
-          {/* Right Section */}
-          <Grid item xs={12} lg={4} className={classes.item3}>
-            <Grid container>
-              <Grid item xs={12}>
-                <Paper className={dynamicClasses.join(' ')}>
-                  <p style={{ marginBottom: 0 }}><b>Reporter:</b> {creator.email}</p>
-                  {assigneeField}
-                  <p><b>Created At:</b> {new Date(+createdDate).toLocaleString()}</p>
-                  <p><b>Updated At:</b> {new Date(+updatedDate).toLocaleString()}</p>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+          <RightSection
+            item3Class={classes.item3}
+            dynamicClasses={dynamicClasses}
+            createdDate={createdDate}
+            updatedDate={updatedDate}
+            creator={creator}
+          >
+            {assigneeField}
+          </RightSection>
+        </Grid >
       )
     }
 
