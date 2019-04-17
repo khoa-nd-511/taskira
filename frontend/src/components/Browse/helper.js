@@ -69,6 +69,9 @@ export const styles = theme => ({
       order: 3,
     },
   },
+  item4: {
+    order: 4,
+  },
   centeringChildren: {
     display: 'flex',
     alignItems: 'center'

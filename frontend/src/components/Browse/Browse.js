@@ -15,6 +15,7 @@ import RightSection from './RightSection/RightSection';
 import LeftUpperSection from './LeftUpperSection/LeftUpperSection';
 
 import { styles } from './helper';
+import CommentSection from './CommentSection/CommentSection';
 
 export class Browse extends Component {
   inputSubject = new Subject();
@@ -238,6 +239,7 @@ export class Browse extends Component {
             </Grid>
           </Grid>
 
+          {/* Right Section */}
           <RightSection
             item3Class={classes.item3}
             dynamicClasses={dynamicClasses}
@@ -247,6 +249,11 @@ export class Browse extends Component {
           >
             {assigneeField}
           </RightSection>
+
+          {/* Comments Section */}
+          <CommentSection
+            classes={classes}
+          />
         </Grid >
       )
     }
