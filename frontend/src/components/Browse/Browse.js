@@ -15,26 +15,17 @@ import {
 import {
   Grid,
   Paper,
-  Button,
-  Chip,
-  Avatar,
   ClickAwayListener,
-  MenuItem,
-  Menu
 } from '@material-ui/core';
-import {
-  ErrorOutlineRounded,
-  ArrowDropUpRounded,
-  ArrowDropDownRounded
-} from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
 import Spinner from '../UI/Spinner/Spinner';
 import * as actions from '../../store/actions';
 import RightSection from './RightSection/RightSection';
+import LeftUpperSection from './LeftUpperSection/LeftUpperSection';
 
-import { displayStatus, statusList, getStatus, styles } from './helper';
+import { styles } from './helper';
 
 export class Browse extends Component {
   inputSubject = new Subject();
@@ -187,6 +178,7 @@ export class Browse extends Component {
       textInput,
       showActions,
       reAssign,
+      showStatusList
     } = this.state;
     let dynamicClasses = [classes.paper];
 
@@ -255,57 +247,18 @@ export class Browse extends Component {
           {/* Left Section */}
           <Grid item xs={12} lg={8} className={classes.item2}>
             <Grid container>
+
               {/* Ticket Details */}
-              <Grid item xs={12}>
-                <Paper className={classes.paper}>
-                  <div className={classes.div}>
-                    <b>Status:</b>
-                    <Button
-                      id="statusBtn"
-                      color="primary"
-                      variant="contained"
-                      className={[classes.button, classes.buttonRelative].join(' ')}
-                      onClick={() => this.updateStatusHandler(status)}
-                    >
-                      {displayStatus(status)}
-
-                      <Menu
-                        open={this.state.showStatusList}
-                        anchorEl={this.state.showStatusList ? document.querySelector('#statusBtn') : null}
-                      >
-                        {
-                          statusList.map((s, i) => {
-                            return <MenuItem key={s} onClick={() => this.props.onUpdateTicketStatus(_id, getStatus(i))}>{displayStatus(s)}</MenuItem>
-                          })
-                        }
-                      </Menu>
-                    </Button>
-                  </div>
-
-
-                  <div className={classes.div}>
-                    <b>Label:</b>
-                    <Chip
-                      avatar={<Avatar><ErrorOutlineRounded /></Avatar>}
-                      label={label}
-                      className={[classes.chip, classes.customChip].join(' ')}
-                      color={label === 'develop' ? "primary" : "secondary"}
-                    />
-                  </div>
-
-
-                  <div className={[classes.div, classes.centeringChildren].join(' ')}>
-                    <b style={{ color: 'black' }}>Priority:</b>
-                    <span
-                      className={[classes.prio, classes.centeringChildren].join(' ')}
-                      style={{ color: hiPri ? "red" : "blue" }}
-                    >
-                      {hiPri ? <ArrowDropUpRounded color="secondary" /> : <ArrowDropDownRounded color="primary" />}
-                      {hiPri ? 'Urgent' : 'Normal'}
-                    </span>
-                  </div>
-                </Paper>
-              </Grid>
+              <LeftUpperSection
+                classes={classes}
+                showStatusList={showStatusList}
+                _id={_id}
+                hiPri={hiPri}
+                label={label}
+                status={status}
+                reUpdateTicketStatus={this.props.onUpdateTicketStatus}
+                updateTicketStatus={this.updateStatusHandler}
+              />
 
               {/* Ticket Description */}
               <Grid item xs={12}>
