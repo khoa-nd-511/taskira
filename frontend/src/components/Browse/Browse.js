@@ -2,11 +2,14 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import { withSnackbar } from 'notistack';
-import { Subject, empty } from 'rxjs';
+import { Subject, empty, fromEvent, of } from 'rxjs';
 import {
   debounceTime,
   tap,
   switchMap,
+  takeUntil,
+  delay,
+  filter,
 } from 'rxjs/operators';
 
 import {
@@ -15,7 +18,9 @@ import {
   Button,
   Chip,
   Avatar,
-  ClickAwayListener
+  ClickAwayListener,
+  MenuItem,
+  Menu
 } from '@material-ui/core';
 import {
   ErrorOutlineRounded,
@@ -27,7 +32,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
 import Spinner from '../UI/Spinner/Spinner';
 import * as actions from '../../store/actions';
-import { displayStatus, styles } from './helper';
+import { displayStatus, statusList, getStatus, styles } from './helper';
 
 export class Browse extends Component {
   inputSubject = new Subject();
@@ -46,6 +51,8 @@ export class Browse extends Component {
     reAssign: false,
     searchingFor: '',
     textInput: '',
+    longClickDetected: false,
+    showStatusList: false,
   };
 
   onHandleInputChanged = e => {
@@ -91,7 +98,7 @@ export class Browse extends Component {
       }
     }
 
-    return fetch('http://localhost:5000/graphql', {
+    return fetch('http://localhost:1000/graphql', {
       method: 'POST',
       body: JSON.stringify(reqBody),
       headers: { 'Content-Type': 'application/json' }
@@ -105,7 +112,15 @@ export class Browse extends Component {
     })
   }
 
-  updateStatusHandler = status => {
+  updateStatusHandler = (status) => {
+    if (['resolved', 'invalid'].includes(status)) return;
+
+    const { longClickDetected } = this.state;
+    if (longClickDetected) {
+      this.setState({ longClickDetected: false })
+      return;
+    }
+
     this.props.onUpdateTicketStatus(this.props.selectedTicket._id, status);
   }
 
@@ -129,6 +144,29 @@ export class Browse extends Component {
     this.inputSource$.subscribe(({ data }) => {
       const { searchUsers } = data;
       this.setState({ suggestions: searchUsers, showList: true, searchingFor: '' });
+    });
+
+    const clicksOnBtn = target => (
+      target === document.querySelector('#statusBtn') ||
+      target === document.querySelector('#statusBtn span')
+    )
+
+    const mouseUp$ = fromEvent(document, 'mouseup');
+    const mouseDown$ = fromEvent(document, 'mousedown');
+
+    const clickAndHold$ = mouseDown$.pipe(
+      switchMap(e => (
+        of(e).pipe(
+          tap(this.setState({ showStatusList: false })),
+          filter(e => clicksOnBtn(e.target)),
+          delay(1000),
+          takeUntil(mouseUp$),
+        )
+      )),
+    );
+
+    clickAndHold$.subscribe(e => {
+      this.setState({ longClickDetected: true, showStatusList: true });
     });
   }
 
@@ -165,6 +203,7 @@ export class Browse extends Component {
     } else {
       localStorage.setItem('selectedTicket', JSON.stringify(selectedTicket._id));
       const {
+        _id,
         title,
         label,
         description,
@@ -178,7 +217,7 @@ export class Browse extends Component {
 
       let assigneeField = null;
       if (assignee !== null && !reAssign) {
-        assigneeField = <p><b>Assignee:</b> <span className={classes.hoverable} onClick={() => this.switchToAutoComplete(assignee.email)}>{' ' + assignee.email}</span></p>;
+        assigneeField = <p><b>Assignee:</b> <span className={classes.hoverable} onMouseDown={() => this.switchToAutoComplete(assignee.email)}>{' ' + assignee.email}</span></p>;
       } else {
         assigneeField = (
           <ClickAwayListener onClickAway={this.handleClickAway}>
@@ -219,7 +258,26 @@ export class Browse extends Component {
                 <Paper className={classes.paper}>
                   <div className={classes.div}>
                     <b>Status:</b>
-                    <Button color="primary" variant="contained" className={classes.button} onClick={() => this.updateStatusHandler(status)}>{displayStatus(status)}</Button>
+                    <Button
+                      id="statusBtn"
+                      color="primary"
+                      variant="contained"
+                      className={[classes.button, classes.buttonRelative].join(' ')}
+                      onClick={() => this.updateStatusHandler(status)}
+                    >
+                      {displayStatus(status)}
+
+                      <Menu
+                        open={this.state.showStatusList}
+                        anchorEl={this.state.showStatusList ? document.querySelector('#statusBtn') : null}
+                      >
+                        {
+                          statusList.map((s, i) => {
+                            return <MenuItem key={s} onClick={() => this.props.onUpdateTicketStatus(_id, getStatus(i))}>{displayStatus(s)}</MenuItem>
+                          })
+                        }
+                      </Menu>
+                    </Button>
                   </div>
 
 

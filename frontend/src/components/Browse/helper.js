@@ -17,6 +17,15 @@ export const displayStatus = status => {
   }
 }
 
+export const statusList = ['ready', 'inprogress', 'review', 'deploy', 'resolved', 'invalid'];
+
+export const getStatus = i => {
+  if ( i === 0 ) return 'default';
+  if ( i === 5 ) return 'invalid';
+
+  return statusList[i - 1];
+}
+
 export const styles = theme => ({
   root: {
     ...theme.typography.body1
@@ -67,6 +76,9 @@ export const styles = theme => ({
   assigneeField: {
     display: 'flex',
     alignItems: 'baseline'
+  },
+  buttonRelative: {
+    position: 'relative'
   },
   cover: {
     position: 'relative',

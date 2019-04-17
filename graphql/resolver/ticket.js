@@ -75,6 +75,9 @@ module.exports = {
         case 'deploy':
           newStatus = 'resolved'
           break;
+        case 'resolved':
+          newStatus = 'resolved'
+          break;
         case 'invalid':
           newStatus = 'invalid'
           break;
