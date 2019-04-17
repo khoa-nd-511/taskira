@@ -27,8 +27,8 @@ const schema = buildSchema(`
 
   type Comment {
     _id: ID!
-    userId: ID!
-    ticketId: ID!
+    user: ID!
+    ticket: ID!
     content: String!
     createdDate: String!
     updatedDate: String!
@@ -72,6 +72,7 @@ const schema = buildSchema(`
     createUser(userInput: UserInput): User
     assignTicket(userEmail: String, ticketId: ID): Ticket
     updateStatus(ticketId: ID, status: String): UpdateStatusData
+    comment(ticketId: ID, currentUser: ID, text: String): Comment!
   }
 
   schema {
