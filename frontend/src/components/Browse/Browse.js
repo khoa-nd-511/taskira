@@ -3,20 +3,9 @@ import { connect } from 'react-redux';
 
 import { withSnackbar } from 'notistack';
 import { Subject, empty, fromEvent, of } from 'rxjs';
-import {
-  debounceTime,
-  tap,
-  switchMap,
-  takeUntil,
-  delay,
-  filter,
-} from 'rxjs/operators';
+import { debounceTime, tap, switchMap, takeUntil, delay, filter, } from 'rxjs/operators';
 
-import {
-  Grid,
-  Paper,
-  ClickAwayListener,
-} from '@material-ui/core';
+import { Grid, Paper, ClickAwayListener, } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 import Autocomplete from "../Form/Autocomplete/Autocomplete";
@@ -170,16 +159,7 @@ export class Browse extends Component {
 
   render() {
     const { classes, assigning, selectedTicket, loading, error } = this.props;
-    const {
-      assigneeFieldObj,
-      suggestions,
-      showList,
-      searchingFor,
-      textInput,
-      showActions,
-      reAssign,
-      showStatusList
-    } = this.state;
+    const { assigneeFieldObj, suggestions, showList, searchingFor, textInput, showActions, reAssign, showStatusList } = this.state;
     let dynamicClasses = [classes.paper];
 
     if (assigning) {
@@ -196,18 +176,7 @@ export class Browse extends Component {
       ticketDetail = 'Browse ticket failed ...'
     } else {
       localStorage.setItem('selectedTicket', JSON.stringify(selectedTicket._id));
-      const {
-        _id,
-        title,
-        label,
-        description,
-        hiPri,
-        createdDate,
-        updatedDate,
-        creator,
-        assignee,
-        status
-      } = selectedTicket;
+      const { _id, title, label, description, hiPri, createdDate, updatedDate, creator, assignee, status } = selectedTicket;
 
       let assigneeField = null;
       if (assignee !== null && !reAssign) {
