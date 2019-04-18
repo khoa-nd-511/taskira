@@ -1,4 +1,6 @@
 const User = require('../../models/user');
+const Ticket = require('../../models/ticket');
+const Comment = require('../../models/comment');
 const DataLoader = require('dataloader');
 
 const ticketLoader = new DataLoader(ticketIds => {
@@ -16,7 +18,12 @@ const userLoader = new DataLoader(async userIds => {
   return userIds.map(id => sortedData[id]);
 });
 
+const commentLoader = new DataLoader(async commentIds => {
+  return Comment.find({ _id: { $in: commentIds } })
+})
+
 module.exports = {
   ticketLoader,
-  userLoader
+  userLoader,
+  commentLoader
 }
