@@ -84,6 +84,11 @@ export const browseTicket = (ticketId) => {
               assignee {
                 email
               }
+              comments {
+                _id
+                user 
+                content
+              }
             },
           }`,
       variables: {
