@@ -12,7 +12,7 @@ const schema = buildSchema(`
     assignee: User
     createdDate: String!
     updatedDate: String!
-    comments: [Comment!]!
+    comments: [CommentData!]!
   }
 
   type User {
@@ -22,7 +22,7 @@ const schema = buildSchema(`
     password: String
     createdTickets: [Ticket!]!
     assignedTickets: [Ticket]!
-    comments: [Comment!]!
+    comments: [CommentData!]!
   }
 
   type Comment {
@@ -41,6 +41,15 @@ const schema = buildSchema(`
 
   type UpdateStatusData {
     status: String!
+    updatedDate: String!
+  }
+
+  type CommentData {
+    _id: ID!
+    user: User!
+    ticket: ID!
+    content: String!
+    createdDate: String!
     updatedDate: String!
   }
 
@@ -72,7 +81,7 @@ const schema = buildSchema(`
     createUser(userInput: UserInput): User
     assignTicket(userEmail: String, ticketId: ID): Ticket
     updateStatus(ticketId: ID, status: String): UpdateStatusData
-    comment(ticketId: ID, currentUser: ID, text: String): Comment!
+    comment(ticketId: ID, currentUser: ID, text: String): Comment
   }
 
   schema {

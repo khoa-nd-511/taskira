@@ -24,9 +24,12 @@ const queryComments = async commentIds => {
   try {
     const comments = await commentLoader.loadMany(commentIds);
 
-    return comments;
+    return comments.map(c => ({
+      ...c._doc,
+      user: queryUser.bind(this, c.user.toString())
+    }));
   } catch (error) {
-
+    throw error;
   }
 }
 

@@ -30,7 +30,6 @@ module.exports = {
         ...ticket._doc,
         creator: queryUser.bind(this, ticket.creator.toString())
       };
-
     } catch (err) {
       throw err;
     }
@@ -41,7 +40,6 @@ module.exports = {
       const tickets = await Ticket.find();
 
       return tickets.map(t => mapTicketData(t));
-
     } catch (err) {
       throw err;
     }
@@ -52,7 +50,6 @@ module.exports = {
       const ticket = await Ticket.findOne({ _id: ticketId });
 
       return mapTicketData(ticket);
-
     } catch (err) {
       throw err;
     }

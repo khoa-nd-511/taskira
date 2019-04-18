@@ -21,7 +21,7 @@ module.exports = {
         updatedDate: new Date(),
       });
 
-      Fawn.Task()
+      await Fawn.Task()
         .save('comments', newComment)
         .update('tickets', { _id: ticketData._id }, {
           $push: { comments: newComment._id }
