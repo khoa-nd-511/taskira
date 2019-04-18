@@ -159,7 +159,7 @@ export class Browse extends Component {
   }
 
   render() {
-    const { classes, assigning, selectedTicket, loading, error } = this.props;
+    const { classes, assigning, selectedTicket, loading, error, userId } = this.props;
     const { assigneeFieldObj, suggestions, showList, searchingFor, textInput, showActions, reAssign, showStatusList } = this.state;
     let dynamicClasses = [classes.paper];
 
@@ -177,7 +177,7 @@ export class Browse extends Component {
       ticketDetail = 'Browse ticket failed ...'
     } else {
       localStorage.setItem('selectedTicket', JSON.stringify(selectedTicket._id));
-      const { _id, title, label, description, hiPri, createdDate, updatedDate, creator, assignee, status } = selectedTicket;
+      const { _id, title, label, description, hiPri, createdDate, updatedDate, creator, assignee, status, comments } = selectedTicket;
 
       let assigneeField = null;
       if (assignee !== null && !reAssign) {
@@ -253,6 +253,8 @@ export class Browse extends Component {
           {/* Comments Section */}
           <CommentSection
             classes={classes}
+            comments={comments}
+            currentUser={userId}
           />
         </Grid >
       )

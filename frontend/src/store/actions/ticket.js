@@ -86,7 +86,10 @@ export const browseTicket = (ticketId) => {
               }
               comments {
                 _id
-                user 
+                user {
+                  _id
+                  name
+                }
                 content
               }
             },
