@@ -84,6 +84,40 @@ export const browseTicket = (ticketId) => {
               assignee {
                 email
               }
+            },
+          }`,
+      variables: {
+        ticketId
+      }
+    };
+
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqBody)
+    })
+      .then(data => data.json())
+      .then(res => {
+        if (res.errors) {
+          dispatch(browseTicketFailed(res.errors[0]))
+        } else {
+          localStorage.setItem('selectedTicket', JSON.stringify(res.data.getTicket._id))
+          dispatch(browseTicketSuccess(res.data.getTicket))
+          dispatch(fetchComments(res.data.getTicket._id))
+        }
+      })
+      .catch(err => dispatch(loadTicketsFailed(err)))
+  }
+}
+
+export const fetchComments = ticketId => {
+  return dispatch => {
+    dispatch(startAction());
+
+    const reqBody = {
+      query: `
+          query BrowseTicket($ticketId: ID!) {
+            getTicket(ticketId: $ticketId) {
               comments {
                 _id
                 user {
@@ -106,14 +140,17 @@ export const browseTicket = (ticketId) => {
     })
       .then(data => data.json())
       .then(res => {
-        if (res.errors) {
-          dispatch(browseTicketFailed(res.errors[0]))
-        } else {
-          localStorage.setItem('selectedTicket', JSON.stringify(res.data.getTicket._id))
-          dispatch(browseTicketSuccess(res.data.getTicket))
-        }
+        console.log(res.data.getTicket.comments)
+        dispatch(updateTicketWithComments(res.data.getTicket.comments))
       })
       .catch(err => dispatch(loadTicketsFailed(err)))
+  }
+}
+
+export const updateTicketWithComments = (comments) => {
+  return {
+    type: actions.UPDATE_TICKET_WITH_COMMENTS,
+    comments
   }
 }
 

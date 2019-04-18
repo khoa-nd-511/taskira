@@ -39,6 +39,14 @@ const root = (state = initialState, action) => {
         tickets: action.tickets
       }
 
+    case actions.UPDATE_TICKET_WITH_COMMENTS:
+      const ticketWithStatus = { ...state.selectedTicket, comments: action.comments }
+      return {
+        ...state,
+        selectedTicket: ticketWithStatus,
+        loading: false,
+      }
+
     case actions.BROWSE_TICKET_SUCCESS:
       return {
         ...state,

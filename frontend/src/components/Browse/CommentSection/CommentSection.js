@@ -10,14 +10,14 @@ const commentSection = props => {
           <Paper className={classes.paper}>
             <p style={{ marginBottom: 0 }}><b>Comments:</b></p>
 
-            {comments.map(c => (
+            {comments && comments.length > 0 ? comments.map(c => (
               <p
                 key={c._id}
                 style={{ textAlign: c.user._id.toString() === currentUser.toString() ? 'right' : 'left' }}
               >
                 <b>{c.user.name}:</b> {c.content}
               </p>)
-            )}
+            ) : <p>Loading comments...</p>}
           </Paper>
         </Grid>
       </Grid>

@@ -17,6 +17,8 @@ export const BROWSE_TICKET                  = 'BROWSE_TICKET'
 export const BROWSE_TICKET_SUCCESS          = 'BROWSE_TICKET_SUCCESS'
 export const BROWSE_TICKET_FAILED           = 'BROWSE_TICKET_FAILED'
 
+export const UPDATE_TICKET_WITH_COMMENTS    = 'UPDATE_TICKET_WITH_COMMENTS'
+
 export const CREATE_TICKET                  = 'CREATE_TICKET'
 export const CREATE_TICKET_SUCCESS          = 'CREATE_TICKET_SUCCESS'
 export const CREATE_TICKET_FAILED           = 'CREATE_TICKET_FAILED'
