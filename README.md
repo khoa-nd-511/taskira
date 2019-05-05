@@ -6,7 +6,7 @@ A Jira-like app for task management
 
 - **Step 1**: Clone or download to your machine
 - **Step 2**: 
-    - In the project directory, run `export taskira_privateKey="whatever_key_you_want" to set the private key for JWT
+    - In the project directory, run `export taskira_privateKey="whatever_key_you_want"` to set the private key for JWT
     - Run `npm run dev` to start the server on port 5000
 - **Step 3**: Open another terminal and run `cd frontend/ && npm start` to start frontend server on port 3000
 
