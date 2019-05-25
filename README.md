@@ -10,7 +10,7 @@ A Jira-like app for task management
     - Run `npm run dev` to start the server on port 5000
 - **Step 3**: Open another terminal and run `cd frontend/ && npm start` to start frontend server on port 3000
 
-### What the project can do
+### What the project can do so far
 - Go to Dashboard to see tickets from all users
 - Only able to sign in (haven't had time for sign up - but that should be quick)
     - There are 3 accounts available at the moment `khoa@mail.com`, `sample@mail.com` and `test@mail.com`
